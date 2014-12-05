@@ -50,7 +50,7 @@ module.exports =
         WORKER_TYPE:"lambda"
 
         API_HOST:
-            port:3000
+            port:80
             hostname:"staging.dropplayer.com"
             protocol:"https:"
             slashes:true
