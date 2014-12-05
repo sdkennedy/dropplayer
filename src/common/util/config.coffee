@@ -42,8 +42,8 @@ module.exports.loadConfig = (config) ->
         #Loadin configuration files
         output = _.extend(
             ENV:env
-            require(path)[env]
             loadSequelize(env)
+            require(path)[env]
         )
         console.log "Loaded configuration ", output
         return output
