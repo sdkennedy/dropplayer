@@ -9,6 +9,7 @@ module.exports.loadConfig = (config) ->
         # Load default config
         else "./config.coffee"
     try
+        console.log "Loading configuration #{path}"
         return require(path)[ process.env.NODE_ENV ? "developement" ]
     catch err
         throw err
