@@ -36,7 +36,7 @@ module.exports.loadConfig = (config) ->
         else "./config.coffee"
     try
         env = process.env.NODE_ENV
-        env = "development" unless typeof env is "string" and eng.length > 0
+        env = "development" unless typeof env is "string" and env.length > 0
         console.log "Environment ", env
         console.log "Loading configuration #{path}"
         #Loadin configuration files
