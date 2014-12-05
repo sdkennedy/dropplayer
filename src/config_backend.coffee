@@ -1,13 +1,8 @@
 module.exports =
-    developement:
+    development:
         DEBUG:true
 
-        DB_NAME:"postgres"
-        DB_USERNAME:"skennedy"
-        DB_PASSWORD:""
-        DB_OPTIONS:
-            dialect:"postgres"
-            port:5432
+        # Database configuration loaded from sequelize.json
 
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
         AUTH_DROPBOX_CLIENT_SECRET:"sxz9uv3igxheygk"

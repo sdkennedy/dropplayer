@@ -33,6 +33,12 @@ initDb = (dbName, dbUser, dbPassword, dbOptions, modelModules) ->
         getAssociations(modelModules).forEach (association) -> association(sequelize)
     return sequelize
 
+initMigrator = (sequelize) ->
+    sequelize.getMigrator(
+        path: process.cwd() + '/migrations'
+        filesFilter: /\.coffee$/
+    )
+
 findAssociation = (ChildModel, ParentModel, type=null) ->
     for key, assoc of ParentModel.associations
         continue unless assoc.source is ChildModel
@@ -40,4 +46,4 @@ findAssociation = (ChildModel, ParentModel, type=null) ->
         return assoc
     return null
 
-module.exports = { initDb, findAssociation }
+module.exports = { initDb, initMigrator, findAssociation }

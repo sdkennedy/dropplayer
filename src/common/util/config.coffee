@@ -1,3 +1,29 @@
+fs = require 'fs'
+_ = require 'underscore'
+
+loadSequelize = (env) ->
+    filepath = "#{ process.cwd() }/src/sequelize.json"
+    keyMap =
+        username:"DB_USERNAME"
+        database:"DB_NAME"
+        password:"DB_PASSWORD"
+    return _.reduce(
+        #Load Json File
+        JSON.parse(
+            fs.readFileSync(filepath, 'utf8')
+        )[env] ? {}
+        #Convert sequelize configuration options to regular config options
+        (acc, sVal, sKey) ->
+            configKey = keyMap[ sKey ]
+            if configKey?
+                acc[ configKey ] = sVal
+            else
+                acc.DB_OPTIONS[ sKey ] = sVal
+            return acc
+        { DB_OPTIONS:{} }
+    )
+
+
 module.exports.loadConfig = (config) ->
     return config if typeof config is "object"
 
@@ -9,15 +35,18 @@ module.exports.loadConfig = (config) ->
         # Load default config
         else "./config.coffee"
     try
-        if typeof process.env.NODE_ENV is "string" and process.env.NODE_ENV.length > 0
-            env = process.env.NODE_ENV
-        else
-            env = "developement"
-        console.log "Enviroment ",process.env
-        console.log "Loading configuration #{path} with env #{env}, NODE_ENV #{ process.env.NODE_ENV }"
-        config = require(path)[env]
-        console.log "Loaded configuration ", config
-        return config
+        env = process.env.NODE_ENV
+        env = "development" unless typeof env is "string" and eng.length > 0
+        console.log "Environment ", env
+        console.log "Loading configuration #{path}"
+        #Loadin configuration files
+        output = _.extend(
+            ENV:env
+            require(path)[env]
+            loadSequelize(env)
+        )
+        console.log "Loaded configuration ", output
+        return output
     catch err
         throw err
         throw new Error "Could not load configuration from: #{path}"

@@ -1,6 +1,6 @@
 #!/usr/bin/env coffee
-
 program = require 'commander'
+Promise = require 'bluebird'
 { loadConfig } = require './common/util/config'
 
 program
@@ -39,13 +39,15 @@ program
         worker = new SQSWorker(program.config)
         worker.listen()
 
-# Api related commands
 program
     .command 'api'
     .description 'Starts up api'
     .action (env, options) ->
         { Api } = require './api/index'
         api = new Api(program.config)
-        api.listen()
+        promise = Promise.resolve()
+        if api.config.ENV isnt "development"
+            promise = promise.then -> api.db().sync()
+        promise.then -> api.listen()
 
 program.parse(process.argv)

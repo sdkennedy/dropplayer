@@ -16,6 +16,11 @@ class Application
             @_db = initDb @config.DB_NAME, @config.DB_USER, @config.DB_PASSWORD, @config.DB_OPTIONS
         @_db
 
+    dbMigrator: ->
+        if not @_dbMigrator
+            @_dbMigrator = initDbMigrator @db()
+        @_dbMigrator
+
     #Lazy initialization of worker bus
     workerBus: ->
         if not @_workerBus?
