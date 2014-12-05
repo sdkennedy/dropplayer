@@ -52,6 +52,6 @@ module.exports =
         API_HOST:
             port:80
             hostname:"staging.dropplayer.com"
-            protocol:"https:"
+            protocol:"http:"
             slashes:true
         UI_URL:"https://staging.dropplayer.com"

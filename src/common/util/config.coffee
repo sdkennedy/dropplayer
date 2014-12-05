@@ -13,9 +13,10 @@ module.exports.loadConfig = (config) ->
             env = process.env.NODE_ENV
         else
             env = "developement"
+        console.log "Enviroment ",process.env
         console.log "Loading configuration #{path} with env #{env}, NODE_ENV #{ process.env.NODE_ENV }"
         config = require(path)[env]
-        console.log "Loaded configuration", config
+        console.log "Loaded configuration ", config
         return config
     catch err
         throw err
