@@ -16,12 +16,18 @@ module.exports =
         SQS_WORKER_QUEUE:"https://sqs.us-west-2.amazonaws.com/711231113371/dropplayer-indexer"
         SQS_WORKER_QUEUE_SIZE:100
 
-        API_HOST:
+        PORT:3000
+
+        API_EXTERNAL_HOST:
             port:3000
             hostname:"localhost"
             protocol:"http:"
             slashes:true
-        UI_URL:"http://localhost:3000"
+        UI_EXTERNAL_HOST:
+            port:3000
+            hostname:"localhost"
+            protocol:"http:"
+            slashes:true
 
     staging:
         DEBUG:true
@@ -44,9 +50,13 @@ module.exports =
 
         WORKER_TYPE:"lambda"
 
-        API_HOST:
-            port:process.env.PORT || 3000
-            hostname:"staging.dropplayer.com"
-            protocol:"http:"
+        PORT:process.env.PORT || 3000
+
+        API_EXTERNAL_HOST:
+            hostname:"dropplayer.com"
+            protocol:"https:"
             slashes:true
-        UI_URL:"https://staging.dropplayer.com"
+        UI_EXTERNAL_HOST:
+            hostname:"dropplayer.com"
+            protocol:"https:"
+            slashes:true

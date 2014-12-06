@@ -45,10 +45,10 @@ class Api extends Application
         @eagerWorker = new EagerWorker config, @workerBus()
 
     listen: ->
-        @express.listen @config.API_HOST.port
+        @express.listen @config.PORT
         @eagerWorker?.listen()
         #console.log app._router.stack
-        console.log "Listening on port #{ @config.API_HOST.port }"
+        console.log "Listening on port #{ @config.PORT }"
 
 
 module.exports = { Api }

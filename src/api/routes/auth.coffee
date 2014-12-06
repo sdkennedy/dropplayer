@@ -19,7 +19,7 @@ module.exports = (app) ->
     passport.use new DropboxOAuth2Strategy(
         clientID: app.config.AUTH_DROPBOX_CLIENT_ID
         clientSecret: app.config.AUTH_DROPBOX_CLIENT_SECRET
-        callbackURL: url.format _.extend({}, app.config.API_HOST, pathname:dropboxCallback)
+        callbackURL: url.format _.extend({}, app.config.API_EXTERNAL_HOST, pathname:dropboxCallback)
         (accessToken, refreshToken, profile, done) ->
             authDropbox
                 .findOrCreate app.db(), accessToken, profile
