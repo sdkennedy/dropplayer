@@ -13,7 +13,7 @@ class Application
     #Lazy initialization of db
     db: ->
         if not @_db?
-            @_db = initDb @config.DB_NAME, @config.DB_USER, @config.DB_PASSWORD, @config.DB_OPTIONS
+            @_db = initDb @config.DB_NAME, @config.DB_USERNAME, @config.DB_PASSWORD, @config.DB_OPTIONS
         @_db
 
     dbMigrator: ->
