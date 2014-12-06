@@ -38,7 +38,6 @@ module.exports.loadConfig = (config) ->
         env = process.env.NODE_ENV
         env = "development" unless typeof env is "string" and env.length > 0
         console.log "Environment ", env
-        console.log process.env
         console.log "Loading configuration #{path}"
         #Loadin configuration files
         output = _.extend(
