@@ -26,7 +26,7 @@ module.exports =
     staging:
         DEBUG:true
 
-        DB_NAME:"dropplayer"
+        DB_NAME:process.env.RDS_DB_NAME
         DB_USERNAME:process.env.RDS_USERNAME
         DB_PASSWORD:process.env.RDS_PASSWORD
         DB_OPTIONS:
