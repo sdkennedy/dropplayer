@@ -22,7 +22,7 @@ class Api extends Application
 
     initExpress: (config) ->
         app = express()
-
+        app.enable 'trust proxy'
         app.use cookieParser()
         app.use bodyParser.json()
         app.use cookieSession({

@@ -55,29 +55,29 @@ find = (sequelize, profileId) ->
 create = (sequelize, accessToken, profile) ->
     User = sequelize.model 'User'
     AuthDropbox = sequelize.model 'AuthDropbox'
-    sequelize.transaction (t) ->
+    sequelize.transaction (transaction) ->
         email = profile.emails?[0]?.value
         displayName = profile.displayName
-        userPromise = User.create({
-            primaryEmail:email,
-            primaryDisplayName:displayName
-        })
-        authPromise = AuthDropbox.create({
-            email:email
-            displayName:displayName
-            providerId:profile.id
-            accessToken:accessToken
-        })
+        userPromise = User.create(
+            {
+                primaryEmail:email,
+                primaryDisplayName:displayName
+            },
+            { transaction }
+        )
+        authPromise = AuthDropbox.create(
+            {
+                email:email
+                displayName:displayName
+                providerId:profile.id
+                accessToken:accessToken
+            },
+            { transaction }
+        )
         Promise
             .all([userPromise, authPromise])
             .spread (user, auth) ->
-                user
-                    .setAuthDropbox auth
-                    .then(
-                        -> t.commit()
-                        -> t.rollback()
-                    )
-                    .then -> user
+                user.setAuthDropbox(auth, {transaction}).then -> user
 
 
 module.exports = { model, associations, findOrCreate, find, create }

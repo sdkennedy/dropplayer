@@ -32,5 +32,12 @@ module.exports = (app) ->
     express.get(
         dropboxCallback,
         passport.authenticate('dropbox-oauth2'),
-        (req, res) -> res.send("success")
+        (req, res) ->
+            res.json(
+                user:url.format _.extend(
+                    {},
+                    app.config.API_EXTERNAL_HOST,
+                    pathname:"/users/#{req.user}"
+                )
+            )
     )
