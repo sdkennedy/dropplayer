@@ -25,5 +25,18 @@
     "request": "^2.49.0",
     "sequelize": "^2.0.0-rc2",
     "underscore": "^1.7.0"
+  },
+  "bundledDependencies": [
+    "baconjs",
+    "bluebird",
+    "musicmetadata",
+    "pg",
+    "request",
+    "sequelize",
+    "underscore"
+  ],
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-aws-lambda": "^0.2.0"
   }
 }
