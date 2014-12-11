@@ -1,5 +1,5 @@
-{ Application } = require '../../common/app'
-initIndexers = require '../../common/indexers/worker'
+{ Application } = require '../../app'
+initIndexers = require '../../indexer/worker'
 Promise = require 'bluebird'
 { Bacon } = require 'baconjs'
 
@@ -13,7 +13,8 @@ class Worker extends Application
     processAction: (action) ->
         handler = @handlers[action.type]
         stream = handler(action)
-        stream.onValue(->) # Do nothing, but make sure stream starts running
+        stream.onError (err) -> console.log "Worker handler error", err
+        stream.onValue -> # Do nothing, but make sure stream starts running
         return stream
 
     registerHandlers: ->

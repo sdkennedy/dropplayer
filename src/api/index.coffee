@@ -1,13 +1,17 @@
+Bacon = require 'baconjs'
+# Express libraries
 express = require 'express'
 cookieParser = require 'cookie-parser'
 bodyParser = require 'body-parser'
 cookieSession = require 'cookie-session'
-initErrors = require './routes/errors'
-initAuth = require './routes/auth'
-initUsers = require './routes/users'
-{ Application } = require '../common/app'
+passport = require 'passport'
+# Application
+{ Application } = require '../app'
 EagerWorker = require '../worker/workers/eager'
 { workerTypes } = require '../worker/constants'
+#Routing Related
+services = require '../services/index'
+initUserRoutes = require './routes/users'
 
 class Api extends Application
     constructor: (config, workerBus=null) ->
@@ -15,6 +19,7 @@ class Api extends Application
 
         #Setup express
         @express = @initExpress @config
+        do @initPassport
         do @initRoutes
 
         #Setup eager worker if necessary
@@ -36,10 +41,21 @@ class Api extends Application
 
         return app
 
+    initPassport: ->
+        # Initialize Passport
+        @express.use passport.initialize()
+        @express.use passport.session()
+        # Session is stored in signed cookie so only store the user.id
+        passport.serializeUser (id, done) ->  done(null, id)
+        passport.deserializeUser (id, done) -> done(null, id)
+
+
     initRoutes: ->
-        initAuth @
-        initUsers @
-        initErrors @
+        initUserRoutes @
+        for serviceName, service of services
+            console.log("initializing routing for", serviceName) if @config.DEBUG
+            service.initRoutes @
+
 
     initEagerWorker: (config) ->
         @eagerWorker = new EagerWorker config, @workerBus()
@@ -47,7 +63,8 @@ class Api extends Application
     listen: ->
         @express.listen @config.PORT
         @eagerWorker?.listen()
-        #console.log app._router.stack
+
+        console.log @express._router.stack.map (route) -> [ route.name, route.regexp ]
         console.log "Listening on port #{ @config.PORT }"
 
 

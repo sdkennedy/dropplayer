@@ -1,6 +1,6 @@
 
 actionKeys =
-    indexSource:'indexSource'
+    indexService:'indexService'
     indexSong:'indexSong'
     removeSong:'removeSong'
 

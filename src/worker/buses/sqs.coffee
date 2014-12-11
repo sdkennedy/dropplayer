@@ -2,7 +2,7 @@ AWS = require 'aws-sdk'
 Promise = require 'bluebird'
 
 createBus = (config) ->
-    sqs = new AWS.SQS( config.AWS_AUTH )
+    sqs = new AWS.SQS( config.AWS_CONFIG )
     Promise.promisifyAll sqs
     return {
         push:(msg, key) ->

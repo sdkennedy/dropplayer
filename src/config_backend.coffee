@@ -2,19 +2,23 @@ module.exports =
     development:
         DEBUG:true
 
-        # Database configuration loaded from sequelize.json
+        # Worker Queue
+        WORKER_TYPE:"lambda"
 
+        # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
         AUTH_DROPBOX_CLIENT_SECRET:"sxz9uv3igxheygk"
 
-        AWS_AUTH:
-            accessKeyId:"AKIAJVEUQHO5IFICBVKQ"
-            secretAccessKey:"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"
+        # Dynamo DB
+        DYNAMODB_CONFIG:
+            endpoint:"http://0.0.0.0:8000"
             region:"us-west-2"
+        DYNAMODB_TABLE_PREFIX:"drop_"
 
-        WORKER_TYPE:"eager"
-        SQS_WORKER_QUEUE:"https://sqs.us-west-2.amazonaws.com/711231113371/dropplayer-indexer"
-        SQS_WORKER_QUEUE_SIZE:100
+        # Kinesis
+        KINESIS_CONFIG:
+            region:"us-west-2"
+        KINESIS_WORKER_QUEUE: "drop_worker"
 
         PORT:3000
 
@@ -32,23 +36,25 @@ module.exports =
     staging:
         DEBUG:true
 
-        DB_NAME:process.env.RDS_DB_NAME
-        DB_USERNAME:process.env.RDS_USERNAME
-        DB_PASSWORD:process.env.RDS_PASSWORD
-        DB_OPTIONS:
-            dialect:"postgres"
-            port:process.env.RDS_PORT
-            host:process.env.RDS_HOSTNAME
+        # Worker Queue
+        WORKER_TYPE:"lambda"
 
+        # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
         AUTH_DROPBOX_CLIENT_SECRET:"sxz9uv3igxheygk"
 
-        AWS_AUTH:
-            accessKeyId:"AKIAJVEUQHO5IFICBVKQ"
-            secretAccessKey:"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"
+        # Dynamo DB
+        DYNAMODB_CONFIG:
+            endpoint:"http://0.0.0.0:8000"
             region:"us-west-2"
+        DYNAMODB_TABLE_PREFIX:"drop_"
 
-        WORKER_TYPE:"lambda"
+        # ElasticCache
+        # Kinesis
+        KINESIS_CONFIG:
+            region:"us-west-2"
+        KINESIS_WORKER_QUEUE: "drop_worker"
+        # Lambda
 
         PORT:process.env.PORT || 3000
 
