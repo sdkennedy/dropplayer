@@ -13,7 +13,12 @@ createBus = function(app) {
   });
   Promise.promisifyAll(kinesis);
   return {
-    push: function(msg, key) {
+    push: function(action, key) {
+      var msg;
+      msg = {
+        config: app.config,
+        action: action
+      };
       return kinesis.putRecordAsync({
         StreamName: config.KINESIS_WORKER_QUEUE,
         PartitionKey: key,

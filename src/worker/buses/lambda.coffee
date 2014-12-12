@@ -1,6 +1,5 @@
 AWS = require 'aws-sdk'
 Promise = require 'bluebird'
-
 createBus = (app) ->
     config = app.config
     kinesis = new AWS.Kinesis(
@@ -9,7 +8,8 @@ createBus = (app) ->
     )
     Promise.promisifyAll kinesis
     return {
-        push:(msg, key) ->
+        push:(action, key) ->
+            msg = { config:app.config, action }
             kinesis.putRecordAsync(
                 StreamName:config.KINESIS_WORKER_QUEUE
                 PartitionKey:key
