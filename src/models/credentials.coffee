@@ -18,7 +18,7 @@ credentialSchema = Joi.object().keys(
 )
 createTable = (app) ->
     app.db().createTableAsync(
-        TableName:prefixTableName(app, credentialsTableName)
+        TableName: app.config.DYNAMODB_TABLE_CREDENTIALS
         # Primary Key
         AttributeDefinitions:[
             AttributeName:"providerId"
@@ -46,7 +46,7 @@ credentialsToUser = (credentials) ->
 
 getCredentials = (app, providerId) ->
     app.dbDoc().getItemAsync(
-        TableName:prefixTableName(app, credentialsTableName)
+        TableName: app.config.DYNAMODB_TABLE_CREDENTIALS
         Key:{ providerId }
         ConsistentRead:true
     ).then (data) ->
@@ -55,7 +55,7 @@ getCredentials = (app, providerId) ->
 
 putCredentials = (app, credentials) ->
     app.dbDoc().putItemAsync(
-        TableName:prefixTableName(app, credentialsTableName)
+        TableName: app.config.DYNAMODB_TABLE_CREDENTIALS
         Item:credentials
     ).then -> credentials
 

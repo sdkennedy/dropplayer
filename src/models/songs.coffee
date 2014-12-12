@@ -29,7 +29,7 @@ songsTableName = "songs"
 
 createTable = (app) ->
     app.db().createTableAsync(
-        TableName:prefixTableName(app, songsTableName)
+        TableName: app.config.DYNAMODB_TABLE_SONGS
         # Primary Key
         AttributeDefinitions:[
             {
@@ -63,7 +63,7 @@ getSongId = (serviceName, serviceSongId) ->
 
 putSong = (app, song) ->
     app.dbDoc().putItemAsync(
-        TableName:prefixTableName(app, songsTableName)
+        TableName: app.config.DYNAMODB_TABLE_SONGS
         Item:nullEmptyStrings(song)
     ).then(
         -> song
@@ -75,14 +75,14 @@ putSong = (app, song) ->
 
 getSong = (app, userId, songId) ->
     app.dbDoc().getItemAsync(
-        TableName:prefixTableName(app, songsTableName)
+        TableName: app.config.DYNAMODB_TABLE_SONGS
         Key:{ userId, songId }
     ).then (data) -> data.Item
 
 getSongs = (app, userId) ->
     doc = app.dbDoc()
     doc.queryAsync(
-        TableName:prefixTableName(app, songsTableName)
+        TableName: app.config.DYNAMODB_TABLE_SONGS
         KeyConditions:[ doc.Condition("userId", "EQ", userId) ]
     ).then (data) -> data.Items
 

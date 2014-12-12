@@ -3,9 +3,6 @@ _ = require 'underscore'
 
 createId = -> uuid.v4()
 
-prefixTableName = (app, tableName) ->
-    (app.config.DYNAMODB_TABLE_PREFIX ? '') + tableName
-
 nullEmptyStrings = (obj) ->
     _.reduce(
         obj
@@ -15,4 +12,4 @@ nullEmptyStrings = (obj) ->
         {}
     )
 
-module.exports = { createId, prefixTableName, nullEmptyStrings }
+module.exports = { createId, nullEmptyStrings }

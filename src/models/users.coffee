@@ -7,7 +7,7 @@ usersTableName = "users"
 
 createTable = (app) ->
     app.db().createTableAsync(
-        TableName:prefixTableName(app, usersTableName)
+        TableName: app.config.DYNAMODB_TABLE_USERS
         # Primary Key
         AttributeDefinitions:[
             AttributeName:"userId"
@@ -31,7 +31,7 @@ userSchema = Joi.object().keys(
 
 getUser = (app, userId) ->
     app.dbDoc().getItemAsync(
-        TableName:prefixTableName(app, usersTableName)
+        TableName: app.config.DYNAMODB_TABLE_USERS
         Key:{ userId }
         ConsistentRead:true
     ).then (data) ->
@@ -40,7 +40,7 @@ getUser = (app, userId) ->
 
 putUser = (app, user) ->
     app.dbDoc().putItemAsync(
-        TableName:prefixTableName(app, usersTableName),
+        TableName: app.config.DYNAMODB_TABLE_USERS
         Item:user
     ).then -> user
 

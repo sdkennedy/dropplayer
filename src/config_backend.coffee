@@ -3,7 +3,7 @@ module.exports =
         DEBUG:true
 
         # Worker Queue
-        WORKER_TYPE:"lambda"
+        WORKER_TYPE:"eager"
 
         # Caching
         CACHE_TYPE:"memory"
@@ -15,16 +15,13 @@ module.exports =
         # AWS Services
         ##############
 
-        # Dynamo DB
-        DYNAMODB_CONFIG:
-            endpoint:"http://0.0.0.0:8000"
-            region:"us-west-2"
-        DYNAMODB_TABLE_PREFIX:"drop_"
+        AWS_REGION:"us-west-2"
 
-        # Kinesis
-        KINESIS_CONFIG:
-            region:"us-west-2"
-        KINESIS_WORKER_QUEUE: "drop_worker"
+        # Dynamo DB
+        DYNAMODB_ENDPOINT:"http://0.0.0.0:8000"
+        DYNAMODB_TABLE_CREDENTIALS:"credentials"
+        DYNAMODB_TABLE_USERS:"users"
+        DYNAMODB_TABLE_SONGS:"songs"
 
         # Web Server Configs
         PORT:3000
@@ -53,24 +50,13 @@ module.exports =
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
         AUTH_DROPBOX_CLIENT_SECRET:"sxz9uv3igxheygk"
 
-
         # AWS Services
         ##############
 
-        # Dynamo DB
-        DYNAMODB_CONFIG:
-            endpoint:"http://0.0.0.0:8000"
-            region:"us-west-2"
-        DYNAMODB_TABLE_PREFIX:"drop_"
-
-        # ElasticCache (redis)
-
+        # Additional configs loaded in through /home/ec2-user/config_backend.config
 
         # Kinesis
-        KINESIS_CONFIG:
-            region:"us-west-2"
         KINESIS_WORKER_QUEUE: "drop_worker"
-        # Lambda
 
         # Web Server Configs
         PORT:process.env.PORT || 3000

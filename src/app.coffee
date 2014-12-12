@@ -26,12 +26,12 @@ class Application
         return @_dbDoc
 
     initDb: ->
-        @_db = new AWS.DynamoDB( @config.DYNAMODB_CONFIG )
+        @_db = new AWS.DynamoDB( endpoint:@config.DYNAMODB_ENDPOINT, region:@config.AWS_REGION )
         Promise.promisifyAll @_db
 
     initDbDoc: ->
         # Using a separate AWS.DynamoDB instance because the first one has been modified with promisifyAll
-        @_dbDoc = new DOC.DynamoDB( new AWS.DynamoDB( @config.DYNAMODB_CONFIG ) )
+        @_dbDoc = new DOC.DynamoDB( new AWS.DynamoDB( endpoint:@config.DYNAMODB_ENDPOINT, region:@config.AWS_REGION ) )
         Promise.promisifyAll @_dbDoc
 
     #Lazy initialization of worker bus
