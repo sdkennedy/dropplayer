@@ -16,6 +16,7 @@ module.exports =
         ##############
 
         AWS_REGION:"us-west-2"
+        AWS_CREDENTIALS_TYPE:"shared"
 
         # Dynamo DB
         DYNAMODB_ENDPOINT:"http://0.0.0.0:8000"
@@ -52,6 +53,8 @@ module.exports =
 
         # AWS Services
         ##############
+
+        AWS_CREDENTIALS_TYPE:"iam"
 
         # Additional configs loaded in through /home/ec2-user/config_backend.config
 

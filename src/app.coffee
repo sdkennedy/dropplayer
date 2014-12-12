@@ -18,21 +18,33 @@ class Application
         return @_cache
 
     db: ->
-        do @initDb unless @_db?
+        unless @_db?
+            @_db = new AWS.DynamoDB(
+                credentials:@awsCredentials()
+                endpoint:@config.DYNAMODB_ENDPOINT
+                region:@config.AWS_REGION
+            )
+            Promise.promisifyAll @_db
         return @_db
 
     dbDoc: ->
-        do @initDbDoc unless @_dbDoc?
+        unless @_dbDoc?
+            @_dbDoc = new DOC.DynamoDB(
+                new AWS.DynamoDB(
+                    credentials:@awsCredentials()
+                    endpoint:@config.DYNAMODB_ENDPOINT
+                    region:@config.AWS_REGION
+                )
+            )
+            Promise.promisifyAll @_dbDoc
         return @_dbDoc
 
-    initDb: ->
-        @_db = new AWS.DynamoDB( endpoint:@config.DYNAMODB_ENDPOINT, region:@config.AWS_REGION )
-        Promise.promisifyAll @_db
-
-    initDbDoc: ->
-        # Using a separate AWS.DynamoDB instance because the first one has been modified with promisifyAll
-        @_dbDoc = new DOC.DynamoDB( new AWS.DynamoDB( endpoint:@config.DYNAMODB_ENDPOINT, region:@config.AWS_REGION ) )
-        Promise.promisifyAll @_dbDoc
+    awsCredentials: ->
+        unless @_awsCredentials?
+            @_awsCredentials = switch @config.AWS_CREDENTIALS_TYPE
+                when "iam" then new AWS.EC2MetadataCredentials()
+                when "shared" then new AWS.SharedIniFileCredentials()
+        return @_awsCredentials
 
     #Lazy initialization of worker bus
     workerBus: ->
