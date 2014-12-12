@@ -4,9 +4,13 @@ AWS = require('aws-sdk');
 
 Promise = require('bluebird');
 
-createBus = function(config) {
-  var kinesis;
-  kinesis = new AWS.Kinesis(config.KINESIS_CONFIG);
+createBus = function(app) {
+  var config, kinesis;
+  config = app.config;
+  kinesis = new AWS.Kinesis({
+    credentials: app.awsCredentials(),
+    region: config.AWS_REGION
+  });
   Promise.promisifyAll(kinesis);
   return {
     push: function(msg, key) {

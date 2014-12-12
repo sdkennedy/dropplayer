@@ -4,7 +4,7 @@ Bacon = require('baconjs').Bacon;
 
 Promise = require('bluebird');
 
-createBus = function(config) {
+createBus = function(app) {
   var bus;
   bus = new Bacon.Bus();
 
