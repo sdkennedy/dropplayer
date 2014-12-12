@@ -1,7 +1,7 @@
 { Bacon } = require 'baconjs'
 Promise = require 'bluebird'
 
-createBus = (config) ->
+createBus = (app) ->
     bus = new Bacon.Bus()
     ###
     oldPush = bus.push

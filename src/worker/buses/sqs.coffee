@@ -1,13 +1,18 @@
 AWS = require 'aws-sdk'
 Promise = require 'bluebird'
 
-createBus = (config) ->
-    sqs = new AWS.SQS( config.AWS_CONFIG )
+createBus = (app) ->
+    throw new Error "SQS not configured"
+    config = app.config
+    sqs = new AWS.SQS(
+        credentials:app.awsCredentials()
+        region:config.AWS_REGION
+    )
     Promise.promisifyAll sqs
     return {
         push:(msg, key) ->
             sqs.sendMessageAsync(
-                QueueUrl:app.config.SQS_WORKER_QUEUE
+                QueueUrl:config.SQS_WORKER_QUEUE
                 MessageBody:JSON.stringify(msg)
             )
     }

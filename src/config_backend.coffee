@@ -45,7 +45,7 @@ module.exports =
         WORKER_TYPE:"lambda"
 
         # Caching
-        CACHE_TYPE:"redis"
+        CACHE_TYPE:"memory"
 
         # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"

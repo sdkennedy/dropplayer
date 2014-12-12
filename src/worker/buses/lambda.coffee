@@ -1,8 +1,12 @@
 AWS = require 'aws-sdk'
 Promise = require 'bluebird'
 
-createBus = (config) ->
-    kinesis = new AWS.Kinesis( config.KINESIS_CONFIG )
+createBus = (app) ->
+    config = app.config
+    kinesis = new AWS.Kinesis(
+        credentials:app.awsCredentials()
+        region:config.AWS_REGION
+    )
     Promise.promisifyAll kinesis
     return {
         push:(msg, key) ->

@@ -49,7 +49,7 @@ class Application
     #Lazy initialization of worker bus
     workerBus: ->
         if not @_workerBus?
-            @_workerBus = workerBuses[@config.WORKER_TYPE] @config
+            @_workerBus = workerBuses[@config.WORKER_TYPE] @
         @_workerBus
 
 module.exports = { Application }
