@@ -1,0 +1,5 @@
+development:
+    AWS_REGION: "us-west-2"
+    DYNAMODB_TABLE_CREDENTIALS: "awseb-e-hqrtcm72gs-stack-CredentialsTable-UQOX7EWIVDS1"
+    DYNAMODB_TABLE_USERS: "awseb-e-hqrtcm72gs-stack-UsersTable-WEOVFSJO03BZ"
+    DYNAMODB_TABLE_SONGS: "awseb-e-hqrtcm72gs-stack-UsersTable-WEOVFSJO03BZ"

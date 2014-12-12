@@ -1,26 +1,28 @@
 fs = require 'fs'
+{ extname } = require 'path'
+yaml = require 'js-yaml'
 _ = require 'underscore'
+default_config = require '../config_backend'
 
-module.exports.loadConfig = (config) ->
-    return config if typeof config is "object"
+loadPath = (path, env) ->
+    switch extname(path)
+        when ".yaml" then yaml.safeLoad( fs.readFileSync(path) )
 
-    path = switch
-        # Load config from config argument
-        when typeof config is "string" then config
-        # Load config from enviroment variables
-        when process.env.DROP_CONFIG? then process.env.DROP_CONFIG
-        # Load default config
-        else "./config"
+module.exports.loadConfig = (path) ->
+    path ?= process.env.DROP_CONFIG
+
     try
         env = process.env.NODE_ENV
         env = "development" unless typeof env is "string" and env.length > 0
+
+        config = { ENV:env }
+        _.extend( config, default_config[env] ) if default_config[env]?
+        _.extend( config, loadPath(path)?[env] ? {} ) if path?
+
         console.log "Environment ", env
         console.log "Loading configuration #{path}"
-        #Loadin configuration files
-        output = require(path)[env]
-        output.ENV = env
-        console.log "Loaded configuration ", output
-        return output
+        console.log "Loaded configuration ", config
+        return config
     catch err
         throw err
         throw new Error "Could not load configuration from: #{path}"

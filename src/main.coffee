@@ -6,7 +6,7 @@ _ = require 'underscore'
 
 program
     .version '0.0.1'
-    .option '-c, --config [config]', 'Path to a backend config file', loadConfig, loadConfig("#{__dirname}/config_backend")
+    .option '-c, --config [config]', 'Path to a backend config file', loadConfig, loadConfig()
 
 program
     .command 'api'

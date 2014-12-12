@@ -17,6 +17,7 @@
     "dynamodb-doc": "git://github.com/awslabs/dynamodb-document-js-sdk",
     "express": "^4.10.4",
     "joi": "^5.0.2",
+    "js-yaml": "^3.2.3",
     "musicmetadata": "^0.6.0",
     "node-uuid": "^1.4.2",
     "passport": "^0.2.1",
