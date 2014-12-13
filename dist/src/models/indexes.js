@@ -50,7 +50,7 @@ createIndex = function(app, userId, service) {
   cache = app.cache();
   return getIndex(app, userId, service).then(function(existingIndex) {
     var info, promises;
-    if ((existingIndex != null) && existingIndex.running) {
+    if (false && (existingIndex != null) && existingIndex.running) {
       return Promise.reject(new errors.IndexRunningError(service, existingIndex.indexId));
     } else {
       info = {

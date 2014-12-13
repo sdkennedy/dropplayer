@@ -1,9 +1,11 @@
-{ loadConfig } = require './util/config'
 Worker = require './worker/workers/worker'
 
-module.exports.handler = (event, context) ->
+exports.handler = (event, context) ->
     console.log "Event", event
     event.Records?.forEach (record) ->
-        msg = JSON.parse new Buffer(record.kinesis.data, 'base64').toString('ascii')
+        try
+            msg = JSON.parse new Buffer(record.kinesis.data, 'base64').toString('ascii')
+        catch err
+            throw new Error("Kinesis record must be JSON")
         worker = new Worker msg.config
         worker.processAction msg.action

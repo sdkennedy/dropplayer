@@ -36,7 +36,8 @@ createIndex = (app, userId, service) ->
     cache = app.cache()
     getIndex app, userId, service
         .then (existingIndex) ->
-            if existingIndex? and existingIndex.running
+            if false and existingIndex? and existingIndex.running
+                #Disable this functionality until elastic cache is set up
                 Promise.reject new errors.IndexRunningError( service, existingIndex.indexId )
             else
                 info =
