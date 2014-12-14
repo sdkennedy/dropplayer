@@ -1,44 +1,44 @@
 { actionKeys } = require './constants'
 { Bacon } = require 'baconjs'
-{ createIndex } = require '../models/indexes'
-indexService = (app, userId, service) ->
-    createIndex app, userId, service
+{ createIndex } = require '../models/services'
+indexService = (app, service, full=false) ->
+    createIndex app, service
         .then (index) ->
             app.workerBus().push(
                 {
                     type: actionKeys.indexService
-                    userId
-                    service
+                    serviceId:service.serviceId
+                    full
                 },
-                "indexer.indexService.#{userId},#{service}"
+                "indexer.indexService.#{service.serviceId}"
             )
             return index
 
-indexSong = (app, userId, service, serviceSongId, serviceSongHash, request, fileSize) ->
+indexSong = (app, userId, serviceId, serviceSongId, serviceSongHash, request, fileSize) ->
     app.workerBus().push(
         {
             type:actionKeys.indexSong
             userId
-            service
+            serviceId
             serviceSongId
             serviceSongHash
             request
             fileSize
         },
-        "indexer.indexSong.#{userId},#{service},#{serviceSongHash}"
+        "indexer.indexSong.#{userId},#{serviceId},#{serviceSongId}"
     )
 
-removeSong = (app, userId, service, serviceSongId, serviceSongHash, request) ->
+removeSong = (app, userId, serviceId, serviceSongId, serviceSongHash, request) ->
     app.workerBus().push(
         {
             type: actionKeys.removeSong
             userId
-            service
+            serviceId
             serviceSongId
             serviceSongHash
             request
         },
-        "indexer.removeSong.#{userId},#{service},#{serviceSongHash}"
+        "indexer.removeSong.#{userId},#{serviceId},#{serviceSongId}"
     )
 
 module.exports = { indexService, indexSong, removeSong }

@@ -9,7 +9,7 @@ songSchema = Joi.object().keys(
     songId:Joi.string().required()
 
     #Service data
-    serviceName:Joi.string().required()
+    serviceId:Joi.string().required()
     serviceSongId:Joi.string().required()
     serviceSongHash:Joi.string()
 
@@ -57,9 +57,9 @@ createTable = (app) ->
             WriteCapacityUnits: 3
     )
 
-getSongId = (serviceName, serviceSongId) ->
-    #encodedServiceSongId = new Buffer(serviceSongId).toString('base64')
-    return "#{serviceName}.#{serviceSongId}"
+getSongId = (serviceId, serviceSongId) ->
+    encodedSericeSongId = new Buffer(serviceSongId).toString('base64')
+    "#{serviceId}.#{encodedSericeSongId}"
 
 putSong = (app, song) ->
     app.dbDoc().putItemAsync(
@@ -72,6 +72,12 @@ putSong = (app, song) ->
             Promise.reject( err )
         )
     )
+
+removeSong = (app, userId, songId) ->
+    app.dbDoc().deleteItemAsync(
+        TableName: app.config.DYNAMODB_TABLE_SONGS
+        Key:{ userId, songId }
+    ).then (data) -> data.Item
 
 getSong = (app, userId, songId) ->
     app.dbDoc().getItemAsync(

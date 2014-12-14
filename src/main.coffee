@@ -16,11 +16,12 @@ program
         api = new Api program.config
         api.listen()
 
-tableAlreadyExists = (err) ->
-    if err.cause?.code? and err.cause.code is "ResourceInUseException"
-        console.log err.cause.message
-    else
-        Promise.reject(err)
+tableAlreadyExists = (tableName) ->
+    (err) ->
+        if err.cause?.code? and err.cause.code is "ResourceInUseException"
+            console.log "#{err.cause.message} #{tableName}"
+        else
+            Promise.reject(err)
 program
     .command 'createtables'
     .description 'Create dynamodb tables'
@@ -33,7 +34,8 @@ program
         promises = _.map(
             models
             (model, name) ->
-                model.createTable?( app ).catch tableAlreadyExists
+                console.log "Creating table #{name}"
+                model.createTable?( app ).catch tableAlreadyExists(name)
         )
         Promise.all(promises)
 

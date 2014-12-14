@@ -1,6 +1,5 @@
-credentials = require './credentials'
-indexes = require './indexes'
+services = require './services'
 songs = require './songs'
 users = require './users'
 
-module.exports = { credentials, indexes, songs, users }
+module.exports = { services, songs, users }

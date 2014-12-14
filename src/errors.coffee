@@ -2,6 +2,7 @@ Promise = require 'bluebird'
 
 httpCodes =
     unauthorized:401
+    forbidden:403
     internalServerError:500
     conflict:409
     preconditionFailed:412
@@ -40,18 +41,13 @@ class NotLoggedIn extends ApiError
     constructor: ->
         super "You must be logged in to complete this action", httpCodes.unauthorized, errorIds.notLoggedIn
 
-class InvalidService extends ApiError
+class Forbidden extends ApiError
     constructor: (service) ->
-        super "Invalid service #{service}", httpCodes.conflict, errorIds.validationError
+        super "You do not have the correct credentials to perform this action", httpCodes.forbidden
 
 class IndexRunningError extends ApiError
-    constructor: (service, @indexId) ->
-        super "Index of #{service} already running", httpCodes.preconditionFailed, errorIds.indexRunning
-
-    toJSON: ->
-        obj = super()
-        obj.indexId = @indexId
-        return obj
+    constructor: (service) ->
+        super "Index of #{service} already running", httpCodes.preconditionFailed
 
 module.exports = {
     httpCodes,
@@ -59,6 +55,6 @@ module.exports = {
     ApiError,
     UnauthorizedServiceError,
     NotLoggedIn,
-    InvalidService,
+    Forbidden,
     IndexRunningError
 }

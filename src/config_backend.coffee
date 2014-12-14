@@ -20,7 +20,7 @@ module.exports =
 
         # Dynamo DB
         DYNAMODB_ENDPOINT:"http://0.0.0.0:8000"
-        DYNAMODB_TABLE_CREDENTIALS:"credentials"
+        DYNAMODB_TABLE_SERVICES:"services"
         DYNAMODB_TABLE_USERS:"users"
         DYNAMODB_TABLE_SONGS:"songs"
 

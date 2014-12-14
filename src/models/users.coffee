@@ -3,8 +3,6 @@ _ = require 'underscore'
 { asyncValidate } = require '../util/joi'
 { createId, prefixTableName } = require './util'
 
-usersTableName = "users"
-
 createTable = (app) ->
     app.db().createTableAsync(
         TableName: app.config.DYNAMODB_TABLE_USERS

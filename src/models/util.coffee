@@ -2,6 +2,7 @@ uuid = require 'node-uuid'
 _ = require 'underscore'
 
 createId = -> uuid.v4()
+createDate = -> (new Date()).toISOString()
 
 nullEmptyStrings = (obj) ->
     _.reduce(
@@ -12,4 +13,4 @@ nullEmptyStrings = (obj) ->
         {}
     )
 
-module.exports = { createId, nullEmptyStrings }
+module.exports = { createId, nullEmptyStrings, createDate }

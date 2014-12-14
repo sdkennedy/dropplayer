@@ -1,7 +1,8 @@
 { getUser } = require '../models/users'
-{ getCredentials } = require '../models/credentials'
-{ getSongId, putSong, getSong } = require '../models/songs'
-{ incrIndexCount } = require '../models/indexes'
+songs = require '../models/songs'
+{ getSongId, putSong, getSong } = songs
+removeSongEntity = songs.removeSong
+{ getService, incrIndexCount, setIndexCount } = require '../models/services'
 services = require '../services/index'
 # Indexer Libraries
 actions = require './actions'
@@ -11,17 +12,17 @@ actions = require './actions'
 Promise = require 'bluebird'
 request = require 'request'
 musicMetadata = require 'musicmetadata'
+_ = require 'underscore'
 
 indexService = do (->
-    callChangeAction = (app, userId, serviceName, change) ->
+    callChangeAction = (app, serviceId, userId, change) ->
         try
             if actions[change.action]?
                 action = actions[change.action]
-
                 Bacon.fromPromise action(
                     app,
                     userId,
-                    serviceName,
+                    serviceId,
                     change.serviceSongId,
                     change.serviceSongHash,
                     change.request,
@@ -32,31 +33,51 @@ indexService = do (->
         catch err
             new Bacon.Error(err)
 
-    return (app, userId, serviceName) ->
+    return (app, serviceId, full) ->
         try
-            if not services[ serviceName ]?
-                return new Bacon.Error("No indexer for service #{serviceName}")
-
-            console.log "indexService", userId, serviceName
-
+            console.log "indexService(#{serviceId}, #{full})"
             Bacon
-                .fromPromise getUser( app, userId )
-                .flatMap (user) ->
-                    if user?
-                        Bacon.fromPromise getCredentials( app, user.services[serviceName] )
-                    else
-                        new Bacon.Error("")
-                .flatMap (credentials) -> services[serviceName].getChanges(credentials)
-                .doAction -> incrIndexCount( app, userId, serviceName, "numFound" )
-                .flatMap (change) -> callChangeAction(app, userId, serviceName, change)
+                # Get service from database
+                .fromPromise getService( app, serviceId )
+                .flatMap (service) ->
+                    # Get changes from service
+                    changesStream = services[ service.serviceName ].getChanges app, service, full
+
+                    #Increment count at most once every 250ms
+                    changesStream
+                        .scan 0, (acc, val) -> acc + 1
+                        .throttle 250
+                        .onValue (value) ->
+                            if value > 0
+                                console.log "setting numFound #{value}"
+                                setIndexCount app, serviceId, "numFound", value
+
+                    # Create subsequent index / delete action
+                    return changesStream.flatMap (change) ->
+                        callChangeAction app, serviceId, service.userId, change
                 #Bring all changes back together into a single event when complete
                 .fold(null, ->)
                 .toEventStream()
         catch err
-            return Bacon.Error(err)
+            return Bacon.Error err
 )
 
 indexSong = do (->
+    sanitizeMetadata = (metadata) ->
+        _.reduce(
+            metadata,
+            (newMetadata, val, key) ->
+                if val is ""
+                    newVal = null
+                else if _.isArray(val)
+                    newVal = val.map (subVal) -> if subVal is "" then null else subVal
+                else
+                    newVal = val
+                newMetadata[key] = newVal
+                return newMetadata
+            {}
+        )
+
     getMetadata = (req, fileSize) ->
         return new Bacon.fromBinder((sink)->
             try
@@ -65,8 +86,10 @@ indexSong = do (->
                     reqStream = request(req)
                     fileSize:fileSize
                 )
-                reqStream.on 'error', (err) -> console.log 'reqest error', err
-                parser.on 'metadata', (result) -> sink new Bacon.Next(result)
+                reqStream.on 'error', (err) ->
+                    console.log 'reqest error', err
+                    sink new Bacon.Error( err )
+                parser.on 'metadata', (result) -> sink new Bacon.Next( sanitizeMetadata(result) )
                 parser.on 'done', (err) ->
                     reqStream.destroy()
                     if err?
@@ -81,14 +104,14 @@ indexSong = do (->
                 return -> reqStream.destroy()
         )
 
-    createSong = (app, userId, songId, serviceName, serviceSongId, serviceSongHash, metadata) ->
+    createSong = (app, userId, serviceId, serviceSongId, serviceSongHash, metadata) ->
         try
             data =
                 # Who owns it
                 userId: userId
-                songId: songId
+                songId: getSongId serviceId, serviceSongId
                 # Where is came from
-                serviceName:serviceName
+                serviceId:serviceId
                 serviceSongId:serviceSongId
                 serviceSongHash:serviceSongHash
 
@@ -107,20 +130,28 @@ indexSong = do (->
         catch err
             return new Bacon.Error err
 
-    return (app, userId, serviceName, serviceSongId, serviceSongHash, req, fileSize) ->
+    return (app, userId, serviceId, serviceSongId, serviceSongHash, req, fileSize) ->
+        console.log "indexSong(#{userId}, #{serviceId}, #{serviceSongId})"
         try
-            songId = getSongId(serviceName, serviceSongId)
+            songId = getSongId serviceId, serviceSongId
             stream = Bacon.fromPromise getSong(app, userId, songId)
-                .flatMap (existingSong) -> (
-                    #Only continue if song is nonexistant or hash different
-                    if existingSong? then Bacon.never() else Bacon.once()
-                )
-                .flatMap -> getMetadata(req, fileSize)
-                .flatMap (metadata) -> createSong(app, userId, songId, serviceName, serviceSongId, serviceSongHash, metadata)
+                #Only continue if song is nonexistant or hash different
+                .flatMap (existingSong) -> if existingSong? then Bacon.never() else Bacon.once()
+                # Get song metadata
+                .flatMap ->
+                    Bacon.retry(
+                        source: -> getMetadata(req, fileSize)
+                        retries: 3
+                        delay: 100
+                    )
+                # Create song in database
+                .flatMap (metadata) -> createSong app, userId, serviceId, serviceSongId, serviceSongHash, metadata
+                # Log how many songs have errors
                 .mapError (err) ->
-                    incrIndexCount app, userId, serviceName, "numErrors"
+                    incrIndexCount app, serviceId, "numErrors"
                     new Bacon.Error(err)
-                .doAction -> incrIndexCount app, userId, serviceName, "numIndexed"
+                # Log how many songs were indexed correctly
+                .doAction -> incrIndexCount app, serviceId, "numIndexed"
 
             return stream
         catch err
@@ -128,9 +159,9 @@ indexSong = do (->
             return new Bacon.Error(err)
 )
 
-removeSong = (app, indexId, userId, service, serviceSongId, serviceSongHash, req) ->
-    console.log "Remove Song Request", userId, service, request
-    Bacon.once("Indexed song")
+removeSong = (app, userId, serviceId, serviceSongId, serviceSongHash, req) ->
+    songId = getSongId serviceId, serviceSongId
+    removeSongEntity app, userId, songId
 
 #Associate an action key with a function to handle the request
 module.exports = (worker) ->
@@ -139,8 +170,8 @@ module.exports = (worker) ->
         (action) ->
             indexService(
                 worker,
-                action.userId,
-                action.service
+                action.serviceId
+                action.full
             )
     )
     worker.registerHandler(
@@ -149,7 +180,7 @@ module.exports = (worker) ->
             indexSong(
                 worker,
                 action.userId,
-                action.service,
+                action.serviceId,
                 action.serviceSongId,
                 action.serviceSongHash,
                 action.request,
@@ -162,7 +193,7 @@ module.exports = (worker) ->
             removeSong(
                 worker,
                 action.userId,
-                action.service,
+                action.serviceId,
                 action.serviceSongId,
                 change.serviceSongHash,
                 action.request

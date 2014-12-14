@@ -7,7 +7,7 @@ _ = require 'underscore'
 passport = require 'passport'
 url = require 'url'
 DropboxOAuth2Strategy = require('passport-dropbox-oauth2').Strategy
-{ getCredentialsOrCreate } = require '../models/credentials'
+{ getServiceOrCreate, putService } = require '../models/services'
 
 asyncRequest = Promise.promisify request
 
@@ -37,7 +37,6 @@ getChanges = do (->
             qs:
                 path_prefix:"/Drop Play"
                 cursor:cursor
-
         asyncRequest(req)
             .spread (response, body) ->
                 try
@@ -57,20 +56,22 @@ getChanges = do (->
                     sink new Bacon.Error(err)
                     sink new Bacon.End()
 
-    return ( credentials ) ->
+    return ( app, service, full ) ->
         Bacon
             .fromBinder (sink) ->
-                getChangePage credentials.accessToken, credentials.rootDir, credentials.cursor, sink
+                cursor = if full then null else service.cursor
+                getChangePage service.accessToken, service.rootDir, cursor, sink
                 return -> #Cleanup function
             .flatMap (item) ->
                 if item.change
                     return Bacon.once item.change
                 else if item.cursor
                     #Update cursor
-                    #auth.item.cursor = item.cursor
+                    service.cursor = item.cursor
 
                     #Prevent stream from ending until auth is saved
-                    return Bacon.fromPromise( auth.save() ).flatMap -> Bacon.never()
+                    console.log "Updating dropbox service cursor", service.cursor
+                    return Bacon.fromPromise( putService(app, service) ).flatMap -> Bacon.never()
                 else
                     return Bacon.never()
 
@@ -84,10 +85,10 @@ getSongUrl = ( auth, song ) ->
     asyncRequest(req).spread (response, body) -> JSON.parse(body)
 
 initRoutes = do (->
-    createCredentials = (accessToken, profile) ->
+    createService = (accessToken, profile) ->
         {
-            providerId:"dropbox.#{profile.id}"
-            service:"dropbox"
+            serviceId:"dropbox.#{profile.id}"
+            serviceName:"dropbox"
             displayName:profile.displayName
             email:profile.emails?[0]?.value
             accessToken:accessToken
@@ -102,10 +103,10 @@ initRoutes = do (->
             clientSecret: app.config.AUTH_DROPBOX_CLIENT_SECRET
             callbackURL: url.format _.extend({}, app.config.API_EXTERNAL_HOST, pathname:dropboxCallback)
             (accessToken, refreshToken, profile, done) ->
-                credentials = createCredentials accessToken, profile
-                getCredentialsOrCreate app, credentials
-                    .then(
-                        (credentials) -> done null, credentials.userId
+                service = createService accessToken, profile
+                getServiceOrCreate app, service
+                    .spread(
+                        (user, service) -> done null, user.userId
                         (err) -> done err, null
                     )
         )
