@@ -12,7 +12,6 @@ indexService = (app, service, full=false) ->
                 },
                 "indexer.indexService.#{service.serviceId}"
             )
-            return index
 
 indexSong = (app, userId, serviceId, serviceSongId, serviceSongHash, request, fileSize) ->
     app.workerBus().push(

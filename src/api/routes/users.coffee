@@ -13,7 +13,11 @@ module.exports = (app) ->
         requireLogin
         (req, res) ->
             getUser app, req.user
-                .then (user) -> res.json(user)
+                .then(
+                    (user) -> res.json(user)
+                    (err) -> res.json(err)
+                )
+
     )
 
     #Must be logged in to use all these routes
@@ -23,12 +27,18 @@ module.exports = (app) ->
         "/users/:userId"
         (req, res) ->
             getUser app, req.params.userId
-                .then (user) -> res.json(user)
+                .then(
+                    (user) -> res.json(user)
+                    (err) -> res.json(err)
+                )
     )
     express.route("/users/:userId/songs")
         .get (req, res) ->
             getSongs app, req.params.userId
-                .then (songs) -> res.json songs
+                .then(
+                    (songs) -> res.json songs
+                    (err) -> res.json(err)
+                )
 
 
     # Indexing
@@ -42,4 +52,7 @@ module.exports = (app) ->
     express.route('/services/:serviceId/actions/index')
         .post (req, res) ->
             indexService app, req.service, true
-                .then (service) -> res.json(service)
+                .then(
+                    (service) -> res.json(service)
+                    (err) -> res.json(err)
+                )
