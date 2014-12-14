@@ -17,7 +17,10 @@ createBus = (app) ->
             ).then(
                 (result) -> (
                     console.log "result", result
-                    return result
+                    return {
+                        result
+                        msg
+                    }
                 )
                 (err) -> (
                     console.log "err", err

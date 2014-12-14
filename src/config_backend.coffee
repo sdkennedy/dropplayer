@@ -3,10 +3,7 @@ module.exports =
         DEBUG:true
 
         # Worker Queue
-        WORKER_TYPE:"eager"
-
-        # Caching
-        CACHE_TYPE:"memory"
+        WORKER_TYPE:"lambda"
 
         # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
@@ -17,6 +14,9 @@ module.exports =
 
         AWS_REGION:"us-west-2"
         AWS_CREDENTIALS_TYPE:"shared"
+
+        # Kinesis
+        KINESIS_WORKER_QUEUE: "drop_worker"
 
         # Dynamo DB
         DYNAMODB_ENDPOINT:"http://0.0.0.0:8000"
@@ -43,9 +43,6 @@ module.exports =
 
         # Worker Queue
         WORKER_TYPE:"lambda"
-
-        # Caching
-        CACHE_TYPE:"memory"
 
         # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
