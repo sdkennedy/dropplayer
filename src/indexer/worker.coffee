@@ -160,6 +160,7 @@ indexSong = do (->
 )
 
 removeSong = (app, userId, serviceId, serviceSongId, serviceSongHash, req) ->
+    console.log "removeSong(#{userId}, #{serviceId}, #{serviceSongId})"
     songId = getSongId serviceId, serviceSongId
     removeSongEntity app, userId, songId
 
