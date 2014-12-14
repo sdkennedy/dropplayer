@@ -3,7 +3,7 @@ module.exports =
         DEBUG:true
 
         # Worker Queue
-        WORKER_TYPE:"lambda"
+        WORKER_TYPE:"sqs"
 
         # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
@@ -17,6 +17,9 @@ module.exports =
 
         # Kinesis
         KINESIS_WORKER_QUEUE: "drop_worker"
+
+        # SQS
+        SQS_WORKER_QUEUE: "https://sqs.us-west-2.amazonaws.com/711231113371/dropplayer-indexer"
 
         # Dynamo DB
         DYNAMODB_ENDPOINT:"http://0.0.0.0:8000"
@@ -57,6 +60,9 @@ module.exports =
 
         # Kinesis
         KINESIS_WORKER_QUEUE: "drop_worker"
+
+        # SQS
+        SQS_WORKER_QUEUE: "https://sqs.us-west-2.amazonaws.com/711231113371/dropplayer-indexer"
 
         # Web Server Configs
         PORT:process.env.PORT || 3000

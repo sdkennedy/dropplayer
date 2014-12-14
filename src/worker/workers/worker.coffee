@@ -2,6 +2,7 @@
 initIndexers = require '../../indexer/worker'
 Promise = require 'bluebird'
 { Bacon } = require 'baconjs'
+errors = require '../../errors'
 
 class Worker extends Application
     constructor: (config, workerBus=null) ->
@@ -12,12 +13,15 @@ class Worker extends Application
     # returns: bacon stream
     processAction: (action) ->
         handler = @handlers[action.type]
-        stream = handler(action)
-        stream.onError (err) ->
-                console.log "Worker handler error", err
-                console.log("Worker handler error stack", err.stack) if err?.stack?
-        stream.onValue -> # Do nothing, but make sure stream starts running
-        return stream
+        if handler?
+            stream = handler(action)
+            stream.onError (err) ->
+                    console.log "Worker handler error", err
+                    console.log("Worker handler error stack", err.stack) if err?.stack?
+            stream.onValue -> # Do nothing, but make sure stream starts running
+            return stream
+        else
+            Bacon.once new Bacon.Error( new errors.NotFound("Worker handler") )
 
     registerHandlers: ->
         initIndexers(@)

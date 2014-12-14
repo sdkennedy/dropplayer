@@ -4,9 +4,7 @@ Promise = require 'bluebird'
 request = require 'request'
 _ = require 'underscore'
 { Bacon } = require 'baconjs'
-passport = require 'passport'
 url = require 'url'
-DropboxOAuth2Strategy = require('passport-dropbox-oauth2').Strategy
 { getServiceOrCreate, putService } = require '../models/services'
 
 asyncRequest = Promise.promisify request
@@ -85,6 +83,7 @@ getSongUrl = ( auth, song ) ->
     asyncRequest(req).spread (response, body) -> JSON.parse(body)
 
 initRoutes = do (->
+
     createService = (accessToken, profile) ->
         {
             serviceId:"dropbox.#{profile.id}"
@@ -96,6 +95,9 @@ initRoutes = do (->
             cursor:null
         }
     return (app) ->
+        passport = require 'passport'
+        DropboxOAuth2Strategy = require('passport-dropbox-oauth2').Strategy
+
         # Dropbox Auth
         dropboxCallback = "/auth/dropbox/callback"
         passport.use new DropboxOAuth2Strategy(

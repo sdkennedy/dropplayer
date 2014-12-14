@@ -3,7 +3,6 @@ AWS = require 'aws-sdk'
 fs = require 'fs'
 grunt = require 'grunt'
 
-grunt.loadNpmTasks 'grunt-aws-lambda'
 grunt.loadNpmTasks 'grunt-contrib-coffee'
 grunt.loadNpmTasks 'grunt-contrib-copy'
 grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -11,7 +10,7 @@ grunt.loadNpmTasks 'grunt-zip'
 
 grunt.initConfig(
     coffee:
-        default:
+        dist:
             options:
                 bare: true
             expand: true
@@ -20,20 +19,49 @@ grunt.initConfig(
             src: ["src/**/*.coffee"]
             dest: 'dist'
             ext: ".js"
-    clean: [ "./dist"]
-    copy:
-        default:
+        lambda:
+            options:
+                bare: true
             expand: true
             flatten: false
             cwd: "."
-            src: ["src/**/*.js", "node_modules/**"]
+            src: ["src/**/*.coffee"]
+            dest: 'lambda'
+            ext: ".js"
+    clean:
+        dist:["./dist"]
+        lambda:["./lambda", "./lambda.zip"]
+    copy:
+        dist:
+            expand: true
+            flatten: false
+            cwd: "."
+            src: ["node_modules/**"]
             dest: "dist"
+        lambda:
+            expand: true
+            flatten: false
+            cwd: "."
+            src: [
+                "node_modules/aws-sdk/**"
+                "node_modules/baconjs/**"
+                "node_modules/bluebird/**"
+                "node_modules/dynamodb-doc/**"
+                "node_modules/joi/**"
+                "node_modules/js-yaml/**"
+                "node_modules/musicmetadata/**"
+                "node_modules/node-uuid/**"
+                "node_modules/request/**"
+                "node_modules/underscore/**"
+            ]
+            dest: "lambda"
+
     lambda_invoke:
         default:
             options:
-                file_name:"./dist/src/lambda_worker.js"
+                file_name:"./lambda/src/lambda_worker.js"
     zip:
-        "./dist.zip":"./dist/**"
+        "./lambda.zip":"./lambda/**"
 
 )
 grunt.task.registerTask 'lambdaupload', 'Deploys lambda worker', ->
@@ -53,13 +81,14 @@ grunt.task.registerTask 'lambdaupload', 'Deploys lambda worker', ->
             Runtime: current.Runtime
 
         console.log "Uploading function"
-        fs.readFile "./dist.zip", (err, data) ->
+        fs.readFile "./lambda.zip", (err, data) ->
             params['FunctionZip'] = data
             lambda.uploadFunction params, (err, data) ->
-                grunt.log.writeln('Package deployed.')
+                console.log(err) if err?
+                grunt.log.writeln('Package deployed.') if not err?
                 done(true)
 
 
-grunt.registerTask 'build', ['clean', 'coffee', 'copy']
-grunt.registerTask 'lambdainvoke', ['build', 'lambda_invoke']
-grunt.registerTask 'lambdadeploy', ['build', 'zip', 'lambdaupload']
+grunt.registerTask 'build', ['clean:dist', 'coffee:dist', 'copy:dist']
+grunt.registerTask 'lambdabuild', ['clean:lambda', 'coffee:lambda', 'copy:lambda']
+grunt.registerTask 'lambdadeploy', ['lambdabuild', 'zip', 'lambdaupload']

@@ -2,7 +2,6 @@ AWS = require 'aws-sdk'
 Promise = require 'bluebird'
 
 createBus = (app) ->
-    throw new Error "SQS not configured"
     config = app.config
     sqs = new AWS.SQS(
         credentials:app.awsCredentials()

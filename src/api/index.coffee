@@ -8,10 +8,11 @@ passport = require 'passport'
 # Application
 { Application } = require '../app'
 EagerWorker = require '../worker/workers/eager'
+Worker = require '../worker/workers/worker'
 { workerTypes } = require '../worker/constants'
 #Routing Related
 services = require '../services/index'
-initUserRoutes = require './routes/users'
+initRoutes = require './routes'
 
 class Api extends Application
     constructor: (config, workerBus=null) ->
@@ -41,6 +42,11 @@ class Api extends Application
 
         return app
 
+    worker: ->
+        if not @_worker?
+            @_worker = new Worker @config
+        return @_worker
+
     initPassport: ->
         # Initialize Passport
         @express.use passport.initialize()
@@ -51,7 +57,7 @@ class Api extends Application
 
 
     initRoutes: ->
-        initUserRoutes @
+        initRoutes @
         for serviceName, service of services
             console.log("initializing routing for", serviceName) if @config.DEBUG
             service.initRoutes @

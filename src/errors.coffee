@@ -53,6 +53,7 @@ module.exports = {
     httpCodes,
     errorIds,
     ApiError,
+    NotFound,
     UnauthorizedServiceError,
     NotLoggedIn,
     Forbidden,
