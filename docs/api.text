@@ -1,7 +1,0 @@
-/{Model.tableName}?
-    offset
-    order
-    filter
-
-/{Model.tableName}/{Model.id}
-/{ParentModel.tableName}/{ParentModel.id}/{ChildModel.id}

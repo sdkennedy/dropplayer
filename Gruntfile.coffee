@@ -61,8 +61,12 @@ grunt.initConfig(
             options:
                 file_name:"./lambda/src/lambda_worker.js"
     zip:
-        "./lambda.zip":"./lambda/**"
-
+        lambda:
+            src:["./lambda/**"]
+            dest:"./lambda.zip"
+        dist:
+            src:["./dist/**"]
+            dest:"./dropplayer-latest.zip"
 )
 grunt.task.registerTask 'lambdaupload', 'Deploys lambda worker', ->
     done = this.async()
