@@ -7,16 +7,6 @@ errors = require '../errors'
 module.exports = (app) ->
     express = app.express
 
-    express.post(
-        "/",
-        (req, res) ->
-            stream = app.worker()
-                .processAction req.body
-                .endOnError()
-            stream.onEnd -> res.status(200)
-            stream.onError (err) -> res.status(500).json(err)
-    )
-
     express.get(
         "/session"
         requireLogin

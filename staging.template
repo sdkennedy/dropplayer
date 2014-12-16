@@ -55,6 +55,77 @@
         "WorkerQueue" : {
             "Type" : "AWS::SQS::Queue"
         },
+        "ServicesTable":{
+            "Type": "AWS::DynamoDB::Table",
+            "Properties":{
+                "AttributeDefinitions":[
+                    {
+                        "AttributeName":"serviceId",
+                        "AttributeType":"S"
+                    }
+                ],
+                "KeySchema":[
+                    {
+                        "AttributeName":"serviceId",
+                        "KeyType":"HASH"
+                    }
+                ],
+                "ProvisionedThroughput":{
+                    "ReadCapacityUnits":1,
+                    "WriteCapacityUnits":1
+                }
+            }
+        },
+        "SongsTable":{
+            "Type": "AWS::DynamoDB::Table",
+            "Properties":{
+                "AttributeDefinitions":[
+                    {
+                        "AttributeName":"userId",
+                        "AttributeType":"S"
+                    },
+                    {
+                        "AttributeName":"songId",
+                        "AttributeType":"S"
+                    }
+                ],
+                "KeySchema":[
+                    {
+                        "AttributeName":"userId",
+                        "KeyType":"HASH"
+                    },
+                    {
+                        "AttributeName":"songId",
+                        "KeyType":"RANGE"
+                    }
+                ],
+                "ProvisionedThroughput":{
+                    "ReadCapacityUnits":1,
+                    "WriteCapacityUnits":1
+                }
+            }
+        },
+        "UsersTable":{
+            "Type": "AWS::DynamoDB::Table",
+            "Properties":{
+                "AttributeDefinitions":[
+                    {
+                        "AttributeName":"userId",
+                        "AttributeType":"S"
+                    }
+                ],
+                "KeySchema":[
+                    {
+                        "AttributeName":"userId",
+                        "KeyType":"HASH"
+                    }
+                ],
+                "ProvisionedThroughput":{
+                    "ReadCapacityUnits":1,
+                    "WriteCapacityUnits":1
+                }
+            }
+        },
         "WebServerRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -137,7 +208,7 @@
                 "ApplicationName": { "Ref": "DropplayerApplication" },
                 "SourceBundle": {
                     "S3Bucket": "dropplayer-code",
-                    "S3Key": "dropplayer-latest.zip"
+                    "S3Key": "dropplayer-2014-12-15-1603.zip"
                 }
             }
         },
@@ -185,6 +256,11 @@
                     },
                     {
                         "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "DROP_AWS_REGION",
+                        "Value": { "Ref" : "AWS::Region" }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
                         "OptionName": "DROP_DYNAMODB_TABLE_SERVICES",
                         "Value": {"Ref" : "ServicesTable"}
                     },
@@ -209,6 +285,7 @@
         "DropplayerWebEnvironment": {
             "Type": "AWS::ElasticBeanstalk::Environment",
             "Properties": {
+                "EnvironmentName":"DropplayerWeb",
                 "Description": "AWS Elastic Beanstalk Environment running Dropplayer Web",
                 "ApplicationName": { "Ref": "DropplayerApplication" },
                 "TemplateName": { "Ref": "DropplayerWebConfigurationTemplate" },
@@ -249,6 +326,11 @@
                     },
                     {
                         "Namespace": "aws:elasticbeanstalk:application:environment",
+                        "OptionName": "DROP_AWS_REGION",
+                        "Value": { "Ref" : "AWS::Region" }
+                    },
+                    {
+                        "Namespace": "aws:elasticbeanstalk:application:environment",
                         "OptionName": "DROP_DYNAMODB_TABLE_SERVICES",
                         "Value": {"Ref" : "ServicesTable"}
                     },
@@ -278,19 +360,20 @@
                         "Value": {"Ref": "WorkerQueue"}
                     }
                 ]
-            },
-            "DropplayerWorkerEnvironment": {
-                "Type": "AWS::ElasticBeanstalk::Environment",
-                "Properties": {
-                    "Description": "AWS Elastic Beanstalk Environment running Dropplayer Web",
-                    "ApplicationName": { "Ref": "DropplayerApplication" },
-                    "TemplateName": { "Ref": "DropplayerWorkerConfigurationTemplate" },
-                    "VersionLabel": { "Ref": "DropplayerApplicationLatestVersion" },
-                    "Tier":{
-                      "Type" : "SQS/HTTP",
-                      "Name" : "Worker",
-                      "Version" : "1.0"
-                    }
+            }
+        },
+        "DropplayerWorkerEnvironment": {
+            "Type": "AWS::ElasticBeanstalk::Environment",
+            "Properties": {
+                "EnvironmentName":"DropplayerWorker",
+                "Description": "AWS Elastic Beanstalk Environment running Dropplayer Web",
+                "ApplicationName": { "Ref": "DropplayerApplication" },
+                "TemplateName": { "Ref": "DropplayerWorkerConfigurationTemplate" },
+                "VersionLabel": { "Ref": "DropplayerApplicationLatestVersion" },
+                "Tier":{
+                  "Type" : "SQS/HTTP",
+                  "Name" : "Worker",
+                  "Version" : "1.0"
                 }
             }
         },
@@ -303,77 +386,6 @@
                         "Protocol": "email"
                     }
                 ]
-            }
-        },
-        "ServicesTable":{
-            "Type": "AWS::DynamoDB::Table",
-            "Properties":{
-                "AttributeDefinitions":[
-                    {
-                        "AttributeName":"serviceId",
-                        "AttributeType":"S"
-                    }
-                ]
-                "KeySchema":[
-                    {
-                        "AttributeName":"serviceId",
-                        "KeyType":"HASH"
-                    }
-                ],
-                "ProvisionedThroughput":{
-                    "ReadCapacityUnits":1,
-                    "WriteCapacityUnits":1
-                }
-            }
-        },
-        "SongsTable":{
-            "Type": "AWS::DynamoDB::Table",
-            "Properties":{
-                "AttributeDefinitions":[
-                    {
-                        "AttributeName":"userId",
-                        "AttributeType":"S"
-                    },
-                    {
-                        "AttributeName":"songId",
-                        "AttributeType":"S"
-                    }
-                ]
-                "KeySchema":[
-                    {
-                        "AttributeName":"userId",
-                        "KeyType":"HASH"
-                    },
-                    {
-                        "AttributeName":"songId",
-                        "KeyType":"RANGE"
-                    }
-                ],
-                "ProvisionedThroughput":{
-                    "ReadCapacityUnits":1,
-                    "WriteCapacityUnits":1
-                }
-            }
-        },
-        "UsersTable":{
-            "Type": "AWS::DynamoDB::Table",
-            "Properties":{
-                "AttributeDefinitions":[
-                    {
-                        "AttributeName":"userId",
-                        "AttributeType":"S"
-                    }
-                ]
-                "KeySchema":[
-                    {
-                        "AttributeName":"userId",
-                        "KeyType":"HASH"
-                    }
-                ],
-                "ProvisionedThroughput":{
-                    "ReadCapacityUnits":1,
-                    "WriteCapacityUnits":1
-                }
             }
         }
     },

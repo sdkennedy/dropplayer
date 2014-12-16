@@ -16,6 +16,14 @@ program
         api = new Api program.config
         api.listen()
 
+program
+    .command 'worker'
+    .description 'Starts up elastic beanstalk worker'
+    .action (env, options) ->
+        HttpSQSWorker = require './worker/workers/sqs_http'
+        worker = new HttpSQSWorker program.config
+        worker.listen()
+
 tableAlreadyExists = (tableName) ->
     (err) ->
         if err.cause?.code? and err.cause.code is "ResourceInUseException"

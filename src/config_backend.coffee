@@ -45,7 +45,7 @@ module.exports =
         DEBUG:true
 
         # Worker Queue
-        WORKER_TYPE:"lambda"
+        WORKER_TYPE:"sqs"
 
         # Dropbox
         AUTH_DROPBOX_CLIENT_ID:"f376r349nw1ixff"
@@ -56,13 +56,7 @@ module.exports =
 
         AWS_CREDENTIALS_TYPE:"iam"
 
-        # Additional configs loaded in through /home/ec2-user/config_backend.config
-
-        # Kinesis
-        KINESIS_WORKER_QUEUE: "drop_worker"
-
-        # SQS
-        SQS_WORKER_QUEUE: "https://sqs.us-west-2.amazonaws.com/711231113371/dropplayer-indexer"
+        # Additional configs loaded in through enviroment variables
 
         # Web Server Configs
         PORT:process.env.PORT || 3000
