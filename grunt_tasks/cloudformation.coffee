@@ -1,5 +1,7 @@
 AWS = require 'aws-sdk'
 { loadConfig } = require '../src/util/config'
+{ songTableProperties } = require '../src/models/songs'
+{ servicesTableProperties } = require '../src/models/service'
 
 stackName = "DropPlayer"
 updateStates = [
@@ -68,61 +70,10 @@ createJSON = (grunt) ->
             Type: "AWS::SQS::Queue"
         ServicesTable:
             Type: "AWS::DynamoDB::Table"
-            Properties:
-                AttributeDefinitions:[
-                    AttributeName:"serviceId"
-                    AttributeType:"S"
-                ]
-                KeySchema:[
-                    AttributeName:"serviceId"
-                    KeyType:"HASH"
-                ]
-                ProvisionedThroughput:
-                    ReadCapacityUnits:1,
-                    WriteCapacityUnits:1
+            Properties: servicesTableProperties
         SongsTable:
             Type: "AWS::DynamoDB::Table"
-            Properties:
-                AttributeDefinitions:[
-                    {
-                        AttributeName:"userId"
-                        AttributeType:"S"
-                    }
-                    {
-                        AttributeName:"songId"
-                        AttributeType:"S"
-                    }
-                ]
-                KeySchema:[
-                    {
-                        AttributeName:"userId"
-                        KeyType:"HASH"
-                    }
-                    {
-                        AttributeName:"songId"
-                        KeyType:"RANGE"
-                    }
-                ]
-                LocalSecondaryIndexes:[
-                    {
-                        IndexName:"index-service"
-                        KeySchema:[
-                            {
-                              AttributeName: "userId"
-                              KeyType: "HASH"
-                            }
-                            {
-                              AttributeName: "serviceId"
-                              KeyType: "RANGE"
-                            }
-                        ]
-                        Projection:
-                            ProjectionType: "ALL"
-                    }
-                ]
-                ProvisionedThroughput:
-                    ReadCapacityUnits:1
-                    WriteCapacityUnits:1
+            Properties: songTableProperties
         UsersTable:
             Type: "AWS::DynamoDB::Table"
             Properties:

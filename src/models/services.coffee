@@ -17,22 +17,58 @@ servicesSchema = Joi.object().keys(
     cursor:Joi.string()
 )
 
-createTable = (app) ->
-    app.db().createTableAsync(
-        TableName: app.config.DYNAMODB_TABLE_SERVICES
-        # Primary Key
-        AttributeDefinitions:[
+servicesTableProperties =
+    AttributeDefinitions:[
+        {
             AttributeName:"serviceId"
             AttributeType:"S"
-        ]
-        KeySchema:[
-            AttributeName:"serviceId"
-            KeyType:"HASH"
-        ]
-        ProvisionedThroughput:
-            ReadCapacityUnits: 3
-            WriteCapacityUnits: 3
-    )
+        }
+        {
+            AttributeName:"email"
+            AttributeType:"S"
+        }
+        {
+            AttributeName:"displayName"
+            AttributeType:"S"
+        }
+    ]
+    KeySchema:[
+        AttributeName:"serviceId"
+        KeyType:"HASH"
+    ]
+    GlobalSecondaryIndexes:[
+        {
+            IndexName: "index-email"
+            KeySchema:[
+                AttributeName:"email"
+                KeyType:"HASH"
+            ]
+            Projection:
+                ProjectionType: "KEYS_ONLY"
+            ProvisionedThroughput:
+                ReadCapacityUnits:1,
+                WriteCapacityUnits:1
+        }
+        {
+            IndexName: "index-displayName"
+            KeySchema:[
+                AttributeName:"displayName"
+                KeyType:"HASH"
+            ]
+            Projection:
+                ProjectionType: "KEYS_ONLY"
+            ProvisionedThroughput:
+                ReadCapacityUnits:1,
+                WriteCapacityUnits:1
+        }
+    ]
+    ProvisionedThroughput:
+        ReadCapacityUnits:1,
+        WriteCapacityUnits:1
+
+createTable = (app) ->
+    table = _.extend TableName: app.config.DYNAMODB_TABLE_SONGS, servicesTableProperties
+    app.db().createTableAsync table
 
 serviceToUser = (service) ->
     user = {

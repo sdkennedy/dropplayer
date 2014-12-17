@@ -119,11 +119,13 @@ indexSong = do (->
                 title: metadata.title
                 artist: metadata.artist
                 album: metadata.album
+                primaryGenre: metadata.genre?[0]
                 genre: metadata.genre
                 discNumber: metadata.disk?.no
                 discNumberTotal: metadata.disk?.of
                 trackNumber: metadata.track?.no
                 trackNumberTotal: metadata.track?.of
+                primaryAlbumArtistSort: metadata.albumartist?[0]
                 albumArtistSort: metadata.albumartist
 
             return Bacon.fromPromise putSong( app, data)
