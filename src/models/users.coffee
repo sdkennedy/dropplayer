@@ -3,22 +3,22 @@ _ = require 'underscore'
 { asyncValidate } = require '../util/joi'
 { createId, prefixTableName } = require './util'
 
+usersTableProperties =
+    AttributeDefinitions:[
+        AttributeName:"userId"
+        AttributeType:"S"
+    ]
+    KeySchema:[
+        AttributeName:"userId"
+        KeyType:"HASH"
+    ]
+    ProvisionedThroughput:
+        ReadCapacityUnits: 3
+        WriteCapacityUnits: 3
+
 createTable = (app) ->
-    app.db().createTableAsync(
-        TableName: app.config.DYNAMODB_TABLE_USERS
-        # Primary Key
-        AttributeDefinitions:[
-            AttributeName:"userId"
-            AttributeType:"S"
-        ]
-        KeySchema:[
-            AttributeName:"userId"
-            KeyType:"HASH"
-        ]
-        ProvisionedThroughput:
-            ReadCapacityUnits: 3
-            WriteCapacityUnits: 3
-    )
+    table = _.extend TableName: app.config.DYNAMODB_TABLE_USERS, usersTableProperties
+    app.db().createTableAsync table
 
 userSchema = Joi.object().keys(
     userId: Joi.string().required()
@@ -42,4 +42,4 @@ putUser = (app, user) ->
         Item:user
     ).then -> user
 
-module.exports = { createTable, createTable, getUser, putUser }
+module.exports = { usersTableProperties, createTable, getUser, putUser }

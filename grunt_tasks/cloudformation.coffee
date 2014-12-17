@@ -1,7 +1,8 @@
 AWS = require 'aws-sdk'
 { loadConfig } = require '../src/util/config'
 { songTableProperties } = require '../src/models/songs'
-{ servicesTableProperties } = require '../src/models/service'
+{ servicesTableProperties } = require '../src/models/services'
+{ usersTableProperties } = require '../src/models/users'
 
 stackName = "DropPlayer"
 updateStates = [
@@ -76,18 +77,7 @@ createJSON = (grunt) ->
             Properties: songTableProperties
         UsersTable:
             Type: "AWS::DynamoDB::Table"
-            Properties:
-                AttributeDefinitions:[
-                    AttributeName:"userId"
-                    AttributeType:"S"
-                ]
-                KeySchema:[
-                    AttributeName:"userId"
-                    KeyType:"HASH"
-                ]
-                ProvisionedThroughput:
-                    ReadCapacityUnits:1
-                    WriteCapacityUnits:1
+            Properties: usersTableProperties
         WebServerRole:
             Type: "AWS::IAM::Role"
             Properties:
@@ -396,6 +386,8 @@ stackState = (cloudFormation, cb)->
 
 module.exports = (grunt) ->
     grunt.task.registerTask "cloudformation", "create infastructure via cloudformation", ->
+        console.log JSON.stringify createJSON(grunt)
+        return
         done = @async()
         config = do loadConfig
         cloudFormation = new AWS.CloudFormation( region:config.AWS_REGION )

@@ -159,4 +159,4 @@ setIndexCount = (app, serviceId, key, count) ->
             Promise.reject( new Error("Could not incrIndexCount(#{serviceId},#{key}): #{err.message}") )
     )
 
-module.exports = { createTable, getService, putService, getServiceOrCreate, createIndex, incrIndexCount, setIndexCount }
+module.exports = { createTable, servicesTableProperties, getService, putService, getServiceOrCreate, createIndex, incrIndexCount, setIndexCount }
