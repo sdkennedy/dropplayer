@@ -208,7 +208,7 @@
                 "ApplicationName": { "Ref": "DropplayerApplication" },
                 "SourceBundle": {
                     "S3Bucket": "dropplayer-code",
-                    "S3Key": "dropplayer-2014-12-15-1603.zip"
+                    "S3Key": "dropplayer-2014-12-15-1617.zip"
                 }
             }
         },
@@ -317,7 +317,12 @@
                     {
                         "Namespace": "aws:autoscaling:launchconfiguration",
                         "OptionName": "InstanceType",
-                        "Value": "t1.micro"
+                        "Value": "m1.small"
+                    },
+                    {
+                        "Namespace": "aws:autoscaling:asg",
+                        "OptionName": "MinSize",
+                        "Value": 2
                     },
                     {
                         "Namespace": "aws:elasticbeanstalk:application:environment",

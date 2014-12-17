@@ -29,5 +29,10 @@
     "passport-dropbox-oauth2": "^0.1.6",
     "request": "^2.49.0",
     "underscore": "^1.7.0"
+  },
+  "devDependencies": {
+    "glob": "^4.3.1",
+    "grunt-aws-s3": "^0.9.4",
+    "grunt-git-revision": "0.0.1"
   }
 }
