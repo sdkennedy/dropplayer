@@ -103,6 +103,23 @@ createJSON = (grunt) ->
                         KeyType:"RANGE"
                     }
                 ]
+                LocalSecondaryIndexes:[
+                    {
+                        IndexName:"index-service"
+                        KeySchema:[
+                            {
+                              AttributeName: "userId"
+                              KeyType: "HASH"
+                            }
+                            {
+                              AttributeName: "serviceId"
+                              KeyType: "RANGE"
+                            }
+                        ]
+                        Projection:
+                            ProjectionType: "ALL"
+                    }
+                ]
                 ProvisionedThroughput:
                     ReadCapacityUnits:1
                     WriteCapacityUnits:1
