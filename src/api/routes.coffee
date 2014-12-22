@@ -1,7 +1,8 @@
 { requireLogin, requireParamIsUser, requireAuthorizedService } = require './util/auth'
+{ buildQueryParams, sendQueryResponse } = require './util/query'
 { indexService, getService } = require '../indexer/actions'
 { getUser } = require '../models/users'
-{ getSongs } = require '../models/songs'
+{ getSongs, songTableProperties } = require '../models/songs'
 errors = require '../errors'
 
 module.exports = (app) ->
@@ -33,9 +34,10 @@ module.exports = (app) ->
     )
     express.route("/users/:userId/songs")
         .get (req, res) ->
-            getSongs app, req.params.userId
+            queryParams = buildQueryParams app, req, null, songTableProperties
+            getSongs app, req.params.userId, queryParams
                 .then(
-                    (songs) -> res.json songs
+                    (songs) -> sendQueryResponse app, null, songTableProperties, req, res, songs
                     (err) -> res.json(err)
                 )
 

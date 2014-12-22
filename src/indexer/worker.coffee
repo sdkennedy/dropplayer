@@ -106,10 +106,13 @@ indexSong = do (->
 
     createSong = (app, userId, serviceId, serviceSongId, serviceSongHash, metadata) ->
         try
+            songId = getSongId serviceId, serviceSongId
+            pictures = metadata.picture ? []
+
             data =
                 # Who owns it
                 userId: userId
-                songId: getSongId serviceId, serviceSongId
+                songId: songId
                 # Where is came from
                 serviceId:serviceId
                 serviceSongId:serviceSongId
@@ -117,6 +120,7 @@ indexSong = do (->
 
                 # Metadata columns
                 title: metadata.title
+                primaryArtist: metadata.artist?[0]
                 artist: metadata.artist
                 album: metadata.album
                 primaryGenre: metadata.genre?[0]
@@ -127,6 +131,8 @@ indexSong = do (->
                 trackNumberTotal: metadata.track?.of
                 primaryAlbumArtistSort: metadata.albumartist?[0]
                 albumArtistSort: metadata.albumartist
+
+                pictures: metadata.picture
 
             return Bacon.fromPromise putSong( app, data)
         catch err

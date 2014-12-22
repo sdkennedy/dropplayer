@@ -1,3 +1,3 @@
 module.exports =
-    dist:["./dist"]
+    dist:["./dist", "./dropplayer-dist-*.zip"]
     lambda:["./lambda", "./lambda.zip"]

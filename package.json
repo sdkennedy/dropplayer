@@ -5,6 +5,7 @@
   "main": "main.js",
   "author": "",
   "license": "ISC",
+  "start": "coffee src/main.coffee api",
   "dependencies": {
     "aws-sdk": "^2.0.29",
     "baconjs": "^0.7.37",
@@ -23,6 +24,7 @@
     "grunt-zip": "^0.16.2",
     "joi": "^5.0.2",
     "js-yaml": "^3.2.3",
+    "mime": "^1.2.11",
     "musicmetadata": "^0.6.0",
     "node-uuid": "^1.4.2",
     "passport": "^0.2.1",

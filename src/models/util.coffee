@@ -8,9 +8,18 @@ nullEmptyStrings = (obj) ->
     _.reduce(
         obj
         (acc, val, key) ->
-            acc[key] = if val is "" then null else val
+            isInvalid = val is "" or not val?
+            acc[key] =  val if not isInvalid
             return acc
         {}
     )
 
-module.exports = { createId, nullEmptyStrings, createDate }
+createQueryParams = (tableName, hashCondition, additionalParams) ->
+    _.extend(
+        {},
+        additionalParams,
+        TableName: tableName
+        KeyConditions:[ hashCondition ].concat( additionalParams.KeyConditions ? [] )
+    )
+
+module.exports = { createId, createDate, nullEmptyStrings, createQueryParams }

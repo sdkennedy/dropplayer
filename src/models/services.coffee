@@ -67,7 +67,7 @@ servicesTableProperties =
         WriteCapacityUnits:1
 
 createTable = (app) ->
-    table = _.extend TableName: app.config.DYNAMODB_TABLE_SONGS, servicesTableProperties
+    table = _.extend TableName: app.config.DYNAMODB_TABLE_SERVICES, servicesTableProperties
     app.db().createTableAsync table
 
 serviceToUser = (service) ->
@@ -159,4 +159,13 @@ setIndexCount = (app, serviceId, key, count) ->
             Promise.reject( new Error("Could not incrIndexCount(#{serviceId},#{key}): #{err.message}") )
     )
 
-module.exports = { createTable, servicesTableProperties, getService, putService, getServiceOrCreate, createIndex, incrIndexCount, setIndexCount }
+module.exports = {
+    createTable
+    servicesTableProperties
+    getService
+    putService
+    getServiceOrCreate
+    createIndex
+    incrIndexCount
+    setIndexCount
+}

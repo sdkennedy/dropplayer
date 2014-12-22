@@ -386,8 +386,6 @@ stackState = (cloudFormation, cb)->
 
 module.exports = (grunt) ->
     grunt.task.registerTask "cloudformation", "create infastructure via cloudformation", ->
-        console.log JSON.stringify createJSON(grunt)
-        return
         done = @async()
         config = do loadConfig
         cloudFormation = new AWS.CloudFormation( region:config.AWS_REGION )

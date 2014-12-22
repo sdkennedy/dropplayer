@@ -1,7 +1,8 @@
 Joi = require 'joi'
 Promise = require 'bluebird'
 _ = require 'underscore'
-{ nullEmptyStrings, prefixTableName } = require './util'
+mime = require 'mime'
+{ nullEmptyStrings, prefixTableName, createQueryParams } = require './util'
 
 songSchema = Joi.object().keys(
 
@@ -45,7 +46,7 @@ songTableProperties =
             AttributeType:"S"
         }
         {
-            AttributeName:"artist"
+            AttributeName:"primaryArtist"
             AttributeType:"S"
         }
         {
@@ -88,14 +89,14 @@ songTableProperties =
                 ProjectionType: "ALL"
         }
         {
-            IndexName:"index-artist"
+            IndexName:"index-primaryArtist"
             KeySchema:[
                 {
                   AttributeName: "userId"
                   KeyType: "HASH"
                 }
                 {
-                  AttributeName: "artist"
+                  AttributeName: "primaryArtist"
                   KeyType: "RANGE"
                 }
             ]
@@ -160,17 +161,76 @@ getSongId = (serviceId, serviceSongId) ->
     encodedSericeSongId = new Buffer(serviceSongId).toString('base64')
     "#{serviceId}.#{encodedSericeSongId}"
 
-putSong = (app, song) ->
-    app.dbDoc().putItemAsync(
-        TableName: app.config.DYNAMODB_TABLE_SONGS
-        Item:nullEmptyStrings(song)
+
+getSongBucketName = (userId) -> "dropplayer-songs-#{ userId }"
+
+createSongBucket = (app, userId) ->
+    bucketName = getSongBucketName userId
+    console.log "Creating bucket", bucketName
+    app.aws('S3').createBucketAsync(
+        ACL:"public-read"
+        Bucket: bucketName
+        CreateBucketConfiguration:
+            LocationConstraint: app.config.AWS_REGION
     ).then(
-        -> song
-        (err) ->(
-            console.log "putSong err", song, err.message
-            Promise.reject( err )
-        )
+        (result) ->
+            console.log "Successfully saved bucket", result
+            return result
+        (err) ->
+            console.log "Could not create bucket:", err
+            Promise.reject err
     )
+
+hasPictures = (song) -> song?.pictures? and song.pictures.length > 0
+
+savePictures = (app, song) ->
+    if hasPictures(song)
+        console.log "Saving pictures", song.pictures
+        song.pictures = Promise.all song.pictures.map (picture, i) -> savePicture app, i, song, picture
+    return Promise.props(song).then (song) ->
+        console.log( "savePictures result", song ) if hasPictures( song )
+        return song
+
+savePicture = (app, i, song, picture) ->
+    bucketName = getSongBucketName song.userId
+    key = "#{song.songId}-#{i}.#{picture.format}"
+
+    console.log "Creating picture bucket:#{bucketName} key:#{key}"
+
+    s3 = app.aws('S3')
+    s3.putObjectAsync(
+        ACL: "public-read"
+        Bucket: bucketName
+        ContentType: mime.lookup picture.format
+        Key: key
+        Body: picture.data
+    ).catch (err) ->
+        console.log "Error saving picture to S3", err
+        if err?.cause?.code is "NoSuchBucket"
+            # Create the bucket then try again
+            createSongBucket app, song.userId
+                .then -> savePicture app, i, song, picture
+        else
+            Promise.reject err
+    .then -> 
+        console.log "Saved picture"
+        s3.getSignedUrlAsync 'getObject', Bucket: bucketName, Key: key
+        
+        
+
+putSong = (app, song) ->
+    sanitizedSong = nullEmptyStrings(song)
+
+    Promise.resolve(song)
+        .then (song) -> savePictures app, sanitizedSong
+        .then (song) ->
+            if hasPictures(song)
+                debugger
+                app.dbDoc().putItemAsync TableName: app.config.DYNAMODB_TABLE_SONGS, Item:sanitizedSong
+                    .catch (err) ->(
+                        console.log "putSong err", err.message, err.stack, song
+                        Promise.reject( err )
+                    )
 
 removeSong = (app, userId, songId) ->
     app.dbDoc().deleteItemAsync(
@@ -184,11 +244,14 @@ getSong = (app, userId, songId) ->
         Key:{ userId, songId }
     ).then (data) -> data.Item
 
-getSongs = (app, userId) ->
+getSongs = (app, userId, queryParams) ->
     doc = app.dbDoc()
-    doc.queryAsync(
-        TableName: app.config.DYNAMODB_TABLE_SONGS
-        KeyConditions:[ doc.Condition("userId", "EQ", userId) ]
-    ).then (data) -> data.Items
+    params = createQueryParams(
+        app.config.DYNAMODB_TABLE_SONGS
+        doc.Condition("userId", "EQ", userId)
+        queryParams
+    )
+    console.log params
+    doc.queryAsync( params )
 
 module.exports = { createTable, songTableProperties, getSongId, putSong, getSong, getSongs }

@@ -10,6 +10,7 @@ class Application
     constructor: (config, workerBus=null) ->
         @config = config
         @_workerBus = workerBus
+        @_awsServices = {}
 
     cache: ->
         if not @_cache?
@@ -19,25 +20,41 @@ class Application
 
     db: ->
         unless @_db?
+            console.log "Initializing DynamoDb"
             @_db = new AWS.DynamoDB(
                 credentials:@awsCredentials()
                 endpoint:@config.DYNAMODB_ENDPOINT
                 region:@config.AWS_REGION
             )
             Promise.promisifyAll @_db
+            @listTables @_db
         return @_db
 
     dbDoc: ->
         unless @_dbDoc?
-            @_dbDoc = new DOC.DynamoDB(
-                new AWS.DynamoDB(
-                    credentials:@awsCredentials()
-                    endpoint:@config.DYNAMODB_ENDPOINT
-                    region:@config.AWS_REGION
-                )
+            db = new AWS.DynamoDB(
+                credentials:@awsCredentials()
+                endpoint:@config.DYNAMODB_ENDPOINT
+                region:@config.AWS_REGION
             )
+            @listTables db
+            @_dbDoc = new DOC.DynamoDB db
             Promise.promisifyAll @_dbDoc
         return @_dbDoc
+
+    listTables: (db) ->
+        db.listTables (err, data) ->
+            console.log("Existing tables", data.TableNames) if not err?
+            console.log("Error getting existing tables", err) if err?
+
+    # Allows reuse of aws services
+    aws: (className, props) ->
+        unless @_awsServices[className]?
+            props ?= {}
+            props.credentials = @awsCredentials()
+            @_awsServices[className] = new AWS[className](props)
+            Promise.promisifyAll @_awsServices[className]
+        return @_awsServices[className]
 
     awsCredentials: ->
         unless @_awsCredentials?

@@ -33,19 +33,19 @@ getChanges = do (->
             headers:
                 Authorization: "Bearer #{accessToken}"
             qs:
-                path_prefix:"/Drop Play"
+                path_prefix:"/drop play/wekeed"
                 cursor:cursor
-        asyncRequest(req)
+        asyncRequest req
             .spread (response, body) ->
                 try
-                    data = JSON.parse(body)
+                    data = JSON.parse body
                     console.log(data) if not data?.entries?
                     changes = (data?.entries ? [])
                         .filter (result) -> filenameIsMusic result[0]
                         .map (result) -> toChange accessToken, result
                         .forEach (change) -> sink new Bacon.Next({ change })
                     if data.has_more
-                        getChangePage(accessToken, rootDir, data.cursor, sink)
+                        getChangePage accessToken, rootDir, data.cursor, sink
                     else
                         sink new Bacon.Next({ cursor:data.cursor })
                         sink new Bacon.End()
