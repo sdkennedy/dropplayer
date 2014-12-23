@@ -109,9 +109,9 @@ getServiceOrCreate = (app, partialService) ->
                 service = _.extend {}, partialService, { userId:createId() }
                 # Create user and service
                 Promise.all([
-                    putUser app, serviceToUser(service)
                     putService app, service
-                ])
+                    putUser app, serviceToUser(service)
+                ]).then -> service
 
 createIndex = (app, service) ->
     if not service?.index?.endAt?

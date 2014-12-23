@@ -3,6 +3,7 @@ AWS = require 'aws-sdk'
 { songTableProperties } = require '../src/models/songs'
 { servicesTableProperties } = require '../src/models/services'
 { usersTableProperties } = require '../src/models/users'
+{ countsTableProperties } = require '../src/models/counts'
 
 stackName = "DropPlayer"
 updateStates = [
@@ -78,6 +79,9 @@ createJSON = (grunt) ->
         UsersTable:
             Type: "AWS::DynamoDB::Table"
             Properties: usersTableProperties
+        UsersTable:
+            Type: "AWS::DynamoDB::Table"
+            Properties: countsTableProperties
         WebServerRole:
             Type: "AWS::IAM::Role"
             Properties:

@@ -89,6 +89,7 @@ indexSong = do (->
                 reqStream.on 'error', (err) ->
                     console.log 'reqest error', err
                     sink new Bacon.Error( err )
+                    sink new Bacon.End()
                 parser.on 'metadata', (result) -> sink new Bacon.Next( sanitizeMetadata(result) )
                 parser.on 'done', (err) ->
                     reqStream.destroy()
@@ -144,13 +145,16 @@ indexSong = do (->
             songId = getSongId serviceId, serviceSongId
             stream = Bacon.fromPromise getSong(app, userId, songId)
                 #Only continue if song is nonexistant or hash different
-                .flatMap (existingSong) -> if existingSong? then Bacon.never() else Bacon.once()
+                .flatMap (existingSong) ->
+                    return Bacon.once()
+                    needsUpdate = not existingSong? or existingSong.serviceSongHash isnt serviceSongHash
+                    if needsUpdate then Bacon.once() else Bacon.never()
                 # Get song metadata
                 .flatMap ->
                     Bacon.retry(
                         source: -> getMetadata(req, fileSize)
                         retries: 3
-                        delay: 100
+                        delay: -> 100
                     )
                 # Create song in database
                 .flatMap (metadata) -> createSong app, userId, serviceId, serviceSongId, serviceSongHash, metadata

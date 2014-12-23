@@ -27,6 +27,9 @@ userSchema = Joi.object().keys(
     dropbox: Joi.object()
 )
 
+getUsers = (app) ->
+    app.dbDoc().scanAsync TableName: app.config.DYNAMODB_TABLE_USERS
+
 getUser = (app, userId) ->
     app.dbDoc().getItemAsync(
         TableName: app.config.DYNAMODB_TABLE_USERS
@@ -42,4 +45,4 @@ putUser = (app, user) ->
         Item:user
     ).then -> user
 
-module.exports = { usersTableProperties, createTable, getUser, putUser }
+module.exports = { usersTableProperties, createTable, getUsers, getUser, putUser }

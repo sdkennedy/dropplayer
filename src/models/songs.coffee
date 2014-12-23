@@ -2,7 +2,10 @@ Joi = require 'joi'
 Promise = require 'bluebird'
 _ = require 'underscore'
 mime = require 'mime'
+sizeOf = require 'image-size'
+XXHash = require 'xxhash'
 { nullEmptyStrings, prefixTableName, createQueryParams } = require './util'
+{ incrCount, getCounts } = require './counts'
 
 songSchema = Joi.object().keys(
 
@@ -161,11 +164,14 @@ getSongId = (serviceId, serviceSongId) ->
     encodedSericeSongId = new Buffer(serviceSongId).toString('base64')
     "#{serviceId}.#{encodedSericeSongId}"
 
-
-getSongBucketName = (userId) -> "dropplayer-songs-#{ userId }"
+getS3Url = (region, bucket, key) -> "https://s3-#{region}.amazonaws.com/#{bucket}/#{key}"
+getS3Bucket = -> "dropplayer-songs"
+getS3Key = (picture) -> 
+    hash = XXHash.hash picture.data, 0xC14E0BE
+    "#{ hash }.#{picture.format}"
 
 createSongBucket = (app, userId) ->
-    bucketName = getSongBucketName userId
+    bucketName = getS3Bucket()
     console.log "Creating bucket", bucketName
     app.aws('S3').createBucketAsync(
         ACL:"public-read"
@@ -186,51 +192,91 @@ hasPictures = (song) -> song?.pictures? and song.pictures.length > 0
 savePictures = (app, song) ->
     if hasPictures(song)
         console.log "Saving pictures", song.pictures
-        song.pictures = Promise.all song.pictures.map (picture, i) -> savePicture app, i, song, picture
-    return Promise.props(song).then (song) ->
-        console.log( "savePictures result", song ) if hasPictures( song )
-        return song
+        song.pictures = Promise.all song.pictures.map (picture) -> savePicture app, song, picture
+    return Promise.props song
 
-savePicture = (app, i, song, picture) ->
-    bucketName = getSongBucketName song.userId
-    key = "#{song.songId}-#{i}.#{picture.format}"
+savePicture = (app, song, picture) ->
+    dimensions = sizeOf picture.data
+    Promise.props(
+        url: savePictureToS3 app, song, picture
+        width: dimensions.width
+        height: dimensions.height
+        type: picture.format
+    )
+
+pictureExists = (app, song, picture) ->
+    app.aws('S3').headObjectAsync(
+        Bucket: getS3Bucket()
+        Key: getS3Key picture
+    ).then(
+        (result) -> true
+        (err) ->
+            if err?.cause?.code is "NotFound"
+                return false
+            else
+                Promise.reject err
+    )
+
+savePictureToS3 = (app, song, picture) ->
+    bucketName = getS3Bucket()
+    key = getS3Key picture
 
     console.log "Creating picture bucket:#{bucketName} key:#{key}"
 
-    s3 = app.aws('S3')
-    s3.putObjectAsync(
-        ACL: "public-read"
-        Bucket: bucketName
-        ContentType: mime.lookup picture.format
-        Key: key
-        Body: picture.data
-    ).catch (err) ->
-        console.log "Error saving picture to S3", err
-        if err?.cause?.code is "NoSuchBucket"
-            # Create the bucket then try again
-            createSongBucket app, song.userId
-                .then -> savePicture app, i, song, picture
-        else
-            Promise.reject err
-    .then -> 
-        console.log "Saved picture"
-        s3.getSignedUrlAsync 'getObject', Bucket: bucketName, Key: key
-        
-        
+    pictureExists app, song, picture
+        .then (exists) ->
+            if not exists
+                app.aws('S3').putObjectAsync(
+                    ACL: "public-read"
+                    Bucket: bucketName
+                    ContentType: mime.lookup picture.format
+                    Key: key
+                    Body: picture.data
+                ).catch (err) ->
+                    console.log "Error saving picture to S3", err
+                    if err?.cause?.code is "NoSuchBucket"
+                        # Create the bucket then try again
+                        createSongBucket app, song.userId
+                            .then -> savePicture app, song, picture
+                    else
+                        Promise.reject err
+            else
+                return Promise.resolve()
+        .then -> getS3Url app.config.AWS_REGION, bucketName, key
+
+incrSongAttrCount = (app, song, key) ->
+    if song[ key ]?
+        countKey = "songs.#{key}.#{song[key]}"
+        incrCount app, song.userId, countKey, song[key]
+    else
+        Promise.resolve()
+
+incrSongCounts = (app, song) ->
+    Promise.all(
+        incrSongAttrCount app, song, 'album'
+        incrSongAttrCount app, song, 'primaryArtist'
+        incrSongAttrCount app, song, 'primaryGenre'
+    )
 
 putSong = (app, song) ->
-    sanitizedSong = nullEmptyStrings(song)
-
     Promise.resolve(song)
-        .then (song) -> savePictures app, sanitizedSong
+        # Sanitize Song
+        .then nullEmptyStrings
+        # Save pictures to S3
+        .then (song) -> savePictures app, song
+        # Save song to database
         .then (song) ->
-            if hasPictures(song)
-                debugger
-                app.dbDoc().putItemAsync TableName: app.config.DYNAMODB_TABLE_SONGS, Item:sanitizedSong
-                    .catch (err) ->(
-                        console.log "putSong err", err.message, err.stack, song
-                        Promise.reject( err )
-                    )
+            app.dbDoc().putItemAsync
+                TableName: app.config.DYNAMODB_TABLE_SONGS
+                Item:song
+            .then(
+                -> song
+                (err) ->(
+                    console.log "putSong err", err.message, err.stack, song
+                    Promise.reject( err )
+                )
+            )
+        .tap (song) -> incrSongCounts app, song
 
 removeSong = (app, userId, songId) ->
     app.dbDoc().deleteItemAsync(
@@ -254,4 +300,23 @@ getSongs = (app, userId, queryParams) ->
     console.log params
     doc.queryAsync( params )
 
-module.exports = { createTable, songTableProperties, getSongId, putSong, getSong, getSongs }
+getAlbums = (app, userId, query) ->
+    console.log "getAlbums"
+    getCounts app, userId, "songs.album", query
+getArtists = (app, userId, query) ->
+    console.log "getArtist"
+    getCounts app, userId, "songs.primaryArtist", query
+getGenres = (app, userId, query) -> 
+    getCounts app, userId, "songs.primaryGenre", query
+
+module.exports = {
+    createTable
+    songTableProperties
+    getSongId
+    putSong
+    getSong
+    getSongs
+    getAlbums
+    getArtists
+    getGenres
+}

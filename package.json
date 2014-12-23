@@ -22,6 +22,7 @@
     "grunt-contrib-coffee": "^0.12.0",
     "grunt-contrib-copy": "^0.7.0",
     "grunt-zip": "^0.16.2",
+    "image-size": "^0.3.5",
     "joi": "^5.0.2",
     "js-yaml": "^3.2.3",
     "mime": "^1.2.11",
@@ -30,7 +31,8 @@
     "passport": "^0.2.1",
     "passport-dropbox-oauth2": "^0.1.6",
     "request": "^2.49.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.7.0",
+    "xxhash": "^0.2.0"
   },
   "devDependencies": {
     "glob": "^4.3.1",

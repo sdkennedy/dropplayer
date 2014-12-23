@@ -33,7 +33,7 @@ getChanges = do (->
             headers:
                 Authorization: "Bearer #{accessToken}"
             qs:
-                path_prefix:"/drop play/wekeed"
+                path_prefix:"/drop play"
                 cursor:cursor
         asyncRequest req
             .spread (response, body) ->
@@ -107,8 +107,10 @@ initRoutes = do (->
             (accessToken, refreshToken, profile, done) ->
                 service = createService accessToken, profile
                 getServiceOrCreate app, service
-                    .spread(
-                        (user, service) -> done null, user.userId
+                    .then(
+                        (service) -> 
+                            console.log 'service', service
+                            done null, service.userId
                         (err) -> done err, null
                     )
         )

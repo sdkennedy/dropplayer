@@ -26,6 +26,7 @@ module.exports =
         DYNAMODB_TABLE_SERVICES:"services"
         DYNAMODB_TABLE_USERS:"users"
         DYNAMODB_TABLE_SONGS:"songs"
+        DYNAMODB_TABLE_COUNTS:"counts"
 
         # Web Server Configs
         PORT:3000

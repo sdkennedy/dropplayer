@@ -43,7 +43,10 @@ program
             models
             (model, name) ->
                 console.log "Creating table #{name}"
-                model.createTable?( app ).catch tableAlreadyExists(name)
+                if model.createTable
+                    model.createTable( app ).catch tableAlreadyExists(name)
+                else
+                    console.log "No createTable for module #{name}"
         )
         Promise.all(promises)
 

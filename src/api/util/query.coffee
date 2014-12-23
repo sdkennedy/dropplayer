@@ -15,6 +15,7 @@ defaultQueryMeta =
 getIntValue = (queryMeta, req, key) ->
     metaVal = queryMeta[key] ? {}
     queryVal = req.query[key]
+    debugger
     val  = parseInt(queryVal, 10)
     val  = null if isNaN(val)
     val ?= metaVal.default if metaVal.default?
