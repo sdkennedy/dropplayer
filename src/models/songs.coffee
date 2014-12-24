@@ -3,7 +3,7 @@ Promise = require 'bluebird'
 _ = require 'underscore'
 mime = require 'mime'
 sizeOf = require 'image-size'
-XXHash = require 'xxhash'
+crypto = require 'crypto'
 { nullEmptyStrings, prefixTableName, createQueryParams } = require './util'
 { incrCount, getCounts } = require './counts'
 
@@ -167,7 +167,7 @@ getSongId = (serviceId, serviceSongId) ->
 getS3Url = (region, bucket, key) -> "https://s3-#{region}.amazonaws.com/#{bucket}/#{key}"
 getS3Bucket = -> "dropplayer-songs"
 getS3Key = (picture) -> 
-    hash = XXHash.hash picture.data, 0xC14E0BE
+    hash = crypto.createHash('sha256').update( picture.data ).digest('hex')
     "#{ hash }.#{picture.format}"
 
 createSongBucket = (app, userId) ->
