@@ -1,4 +1,4 @@
-{ Application } = require '../../app'
+{ Application } = require '../../util/app'
 initIndexers = require '../../indexer/worker'
 Promise = require 'bluebird'
 { Bacon } = require 'baconjs'

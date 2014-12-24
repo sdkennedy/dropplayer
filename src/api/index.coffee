@@ -6,7 +6,7 @@ bodyParser = require 'body-parser'
 cookieSession = require 'cookie-session'
 passport = require 'passport'
 # Application
-{ Application } = require '../app'
+{ Application } = require '../util/app'
 EagerWorker = require '../worker/workers/eager'
 Worker = require '../worker/workers/worker'
 { workerTypes } = require '../worker/constants'

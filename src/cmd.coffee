@@ -35,7 +35,7 @@ program
     .description 'Create dynamodb tables'
     .action (env, options) ->
         AWS = require 'aws-sdk'
-        { Application } = require './app'
+        { Application } = require './util/app'
         models = require './models/index'
 
         app = new Application( program.config )

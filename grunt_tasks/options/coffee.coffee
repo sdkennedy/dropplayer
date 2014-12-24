@@ -4,8 +4,8 @@ module.exports =
             bare: true
         expand: true
         flatten: false
-        cwd: "."
-        src: ["src/**/*.coffee"]
+        cwd: "./src"
+        src: ["**/*.coffee"]
         dest: 'dist'
         ext: ".js"
     lambda:
@@ -13,7 +13,7 @@ module.exports =
             bare: true
         expand: true
         flatten: false
-        cwd: "."
-        src: ["src/**/*.coffee"]
+        cwd: "./src"
+        src: ["**/*.coffee"]
         dest: 'lambda'
         ext: ".js"
