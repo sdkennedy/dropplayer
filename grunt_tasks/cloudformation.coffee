@@ -156,7 +156,7 @@ createJSON = (grunt) ->
                     {
                         Namespace: "aws:elasticbeanstalk:container:nodejs"
                         OptionName: "NodeCommand"
-                        Value: "node ./dist/src/main.js api"
+                        Value: "node cmd.js api"
                     }
                     {
                         Namespace: "aws:elb:loadbalancer"
