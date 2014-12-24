@@ -3,7 +3,7 @@ module.exports =
         expand: true
         flatten: false
         cwd: "."
-        src: ["node_modules/**","package.json"]
+        src: ["node_modules/**","package.json",".ebextensions/**"]
         dest: "dist"
     lambda:
         expand: true
