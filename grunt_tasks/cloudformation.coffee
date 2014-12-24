@@ -79,7 +79,7 @@ createJSON = (grunt) ->
         UsersTable:
             Type: "AWS::DynamoDB::Table"
             Properties: usersTableProperties
-        UsersTable:
+        CountsTable:
             Type: "AWS::DynamoDB::Table"
             Properties: countsTableProperties
         WebServerRole:
@@ -187,7 +187,7 @@ createJSON = (grunt) ->
                     {
                         Namespace: "aws:autoscaling:launchconfiguration"
                         OptionName: "EC2KeyName"
-                        Value: "drop"
+                        Value: "drop2"
                     }
                     {
                         Namespace: "aws:autoscaling:launchconfiguration"
