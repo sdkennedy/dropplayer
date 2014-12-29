@@ -68,8 +68,6 @@ createJSON = (grunt) ->
                 EC2Principal: "ec2.amazonaws.com"
                 OpsWorksPrincipal: "opsworks.amazonaws.com"
     Resources:
-        WorkerQueue:
-            Type: "AWS::SQS::Queue"
         ServicesTable:
             Type: "AWS::DynamoDB::Table"
             Properties: servicesTableProperties
@@ -226,8 +224,7 @@ createJSON = (grunt) ->
                     {
                         Namespace: "aws:elasticbeanstalk:application:environment"
                         OptionName: "DROP_SQS_WORKER_QUEUE"
-                        Value:
-                            Ref: "WorkerQueue"
+                        Value: "https://sqs.us-west-2.amazonaws.com/711231113371/Dropplayer"
                     }
                     {
                         Namespace: "aws:elasticbeanstalk:application:environment"
@@ -330,14 +327,12 @@ createJSON = (grunt) ->
                     {
                         Namespace: "aws:elasticbeanstalk:application:environment"
                         OptionName: "DROP_SQS_WORKER_QUEUE"
-                        Value:
-                            Ref: "WorkerQueue"
+                        Value: "https://sqs.us-west-2.amazonaws.com/711231113371/Dropplayer"
                     }
                     {
                         Namespace: "aws:elasticbeanstalk:sqsd"
                         OptionName: "WorkerQueueURL"
-                        Value:
-                            Ref: "WorkerQueue"
+                        Value: "https://sqs.us-west-2.amazonaws.com/711231113371/Dropplayer"
                     }
                 ]
         DropplayerWorkerEnvironment:
