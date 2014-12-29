@@ -13,10 +13,14 @@ class Worker extends Application
     # returns: bacon stream
     processAction: (action) ->
         handler = @handlers[action.type]
+        console.log "processAction", typeof action, action.type, handler
         if handler?
-            source = -> handler(action)
             # Allow stream to be retried up to 3 times
-            return Bacon.retry { source, retries:3, delay:->100 }
+            return Bacon.retry(
+                source: -> handler(action)
+                retries: 3
+                delay: -> 100
+            )
         else
             return Bacon.once new Bacon.Error( new errors.NotFound("Worker handler for #{ action.type }") )
 
