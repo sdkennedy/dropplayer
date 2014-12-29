@@ -1,4 +1,3 @@
-{ Bacon } = require 'baconjs'
 { indexAlbum } = require '../actions'
 { queryAlbums } = require '../../models/song_albums'
 { queryAll } = require '../../models/util'

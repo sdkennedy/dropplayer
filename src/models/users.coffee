@@ -20,6 +20,9 @@ createTable = (app) ->
     table = _.extend TableName: app.config.DYNAMODB_TABLE_USERS, usersTableProperties
     app.db().createTableAsync table
 
+deleteTable = (app) ->
+    app.db().deleteTableAsync TableName: app.config.DYNAMODB_TABLE_USERS
+
 userSchema = Joi.object().keys(
     userId: Joi.string().required()
     primaryEmail: Joi.string().required()
@@ -45,4 +48,4 @@ putUser = (app, user) ->
         Item:user
     ).then -> user
 
-module.exports = { usersTableProperties, createTable, scanUsers, getUser, putUser }
+module.exports = { usersTableProperties, createTable, deleteTable, scanUsers, getUser, putUser }

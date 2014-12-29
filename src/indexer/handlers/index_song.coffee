@@ -32,7 +32,7 @@ sanitizeMetadata = (metadata) ->
     )
 
 getMetadata = (req, fileSize) ->
-    return new Bacon.fromBinder((sink)->
+    return new Promise ( resolve, reject )->
         try
             parser = musicMetadata(
                 #Request can't be created outside of musicMetadata because stream will start sending data immediately
@@ -41,22 +41,13 @@ getMetadata = (req, fileSize) ->
             )
             reqStream.on 'error', (err) ->
                 console.log 'reqest error', err
-                sink new Bacon.Error( err )
-                sink new Bacon.End()
-            parser.on 'metadata', (result) -> sink new Bacon.Next( sanitizeMetadata(result) )
+                reject err
+            parser.on 'metadata', (result) -> resolve sanitizeMetadata(result)
             parser.on 'done', (err) ->
                 reqStream.destroy()
-                if err?
-                    console.error err
-                    sink new Bacon.Error(err)
-                sink new Bacon.End()
+                reject(err) if err?
         catch err
-            # Catch any uncaught errors
-            sink new Bacon.Error(err)
-            sink new Bacon.End()
-        finally
-            return -> reqStream.destroy()
-    )
+            reject err
 
 createSong = (app, userId, serviceId, serviceSongId, serviceSongHash, metadata) ->
     try
@@ -88,48 +79,42 @@ createSong = (app, userId, serviceId, serviceSongId, serviceSongHash, metadata) 
 
             pictures: saveMetadataPictures app, data, metadata.picture
             
-        return Bacon.fromPromise Promise.props( putSong( app, data ) )
+        Promise.props( putSong( app, data ) )
     catch err
-        return new Bacon.Error err
+        Promise.reject err
 
 createSongAggregates = (app, song) ->
-    streams = []
-    streams.push createAlbum app, song
-    streams.push Bacon.fromPromise putPrimaryArtistBySong(app, song) if song.primaryArtist?
-    streams.push Bacon.fromPromise putPrimaryGenreBySong(app, song) if song.primaryGenre?
-    Bacon.zipWith streams, -> Bacon.once song
+    promises = []
+    promises.push createAlbum app, song
+    promises.push putPrimaryArtistBySong(app, song) if song.primaryArtist?
+    promises.push putPrimaryGenreBySong(app, song) if song.primaryGenre?
+    Promise.all(promises).then -> song
 
 createAlbum = (app, song) ->
     if song.album?
-        Bacon.fromPromise putAlbumBySong(app, song)
-            .flatMap (album) ->
-                indexAlbum app, album
+        putAlbumBySong(app, song).then (album) -> indexAlbum app, album
     else
-        Bacon.never()
+        Promise.resolve song
 
 indexSong = (app, userId, serviceId, serviceSongId, serviceSongHash, req, fileSize) ->
-    #console.log "indexSong(#{userId}, #{serviceId}, #{serviceSongId})"
+    console.log "indexSong(#{userId}, #{serviceId}, #{serviceSongId})"
     try
         songId = getSongId serviceId, serviceSongId
-        return Bacon.fromPromise getSong(app, userId, songId)
-            #Only continue if song is nonexistant or hash different
-            .flatMap (existingSong) ->
-                needsUpdate = not existingSong? or existingSong.serviceSongHash isnt serviceSongHash
-                if needsUpdate then Bacon.once() else Bacon.never()
-            # Get song metadata
-            .flatMap -> getMetadata req, fileSize
-            # Create song in database
-            .flatMap (metadata) -> createSong app, userId, serviceId, serviceSongId, serviceSongHash, metadata
-            # Create song aggregates (artist, album)
-            .flatMap (song) -> createSongAggregates app, song
-            # Log how many songs have errors
-            .mapError (err) ->
-                incrIndexCount app, serviceId, "numErrors"
-                new Bacon.Error(err)
-            # Log how many songs were indexed correctly
-            .doAction -> incrIndexCount app, serviceId, "numIndexed"
+        getSong(app, userId, songId)
+            .then (existingSong) ->
+                console.log "indexSong.songExists(#{userId}, #{serviceId}, #{serviceSongId}) = #{!!existingSong}"
+                return existingSong if existingSong?
+                return getMetadata req, fileSize
+                    .then (metadata) ->
+                        console.log "indexSong.metadata(#{userId}, #{serviceId}, #{serviceSongId}) = #{ metadata?.title }"
+                        createSong app, userId, serviceId, serviceSongId, serviceSongHash, metadata
+                    .then (song) -> createSongAggregates app, song
+                    .tap (song) -> incrIndexCount app, serviceId, "numIndexed"
+                    .catch (err) ->
+                            incrIndexCount app, serviceId, "numErrors"
+                            Promise.reject err
     catch err
         # Catch any uncaught errors
-        return new Bacon.Error err
+        Promise.reject err
 
 module.exports = indexSong

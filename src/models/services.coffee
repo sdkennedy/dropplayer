@@ -70,6 +70,9 @@ createTable = (app) ->
     table = _.extend TableName: app.config.DYNAMODB_TABLE_SERVICES, servicesTableProperties
     app.db().createTableAsync table
 
+deleteTable = (app) ->
+    app.db().deleteTableAsync TableName: app.config.DYNAMODB_TABLE_SERVICES
+
 serviceToUser = (service) ->
     user = {
         userId:service.userId
@@ -161,6 +164,7 @@ setIndexCount = (app, serviceId, key, count) ->
 
 module.exports = {
     createTable
+    deleteTable
     servicesTableProperties
     getService
     putService

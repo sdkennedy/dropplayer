@@ -1,4 +1,3 @@
-{ Bacon } = require 'baconjs'
 rp = require 'request-promise'
 request = require 'request'
 urlFormat = require('url').format
@@ -103,7 +102,7 @@ getReleaseDate = () ->
 
 indexAlbum = (app, data) ->
     console.log "indexAlbum", data
-    promise = getAlbum( app, data.userId, data.countId )
+    return getAlbum( app, data.userId, data.countId )
         .then (album) -> if album? then album else data
         .then (album) -> (
             Promise.all([
@@ -127,7 +126,5 @@ indexAlbum = (app, data) ->
         ).then (album) -> 
             console.log "updateAlbum(#{ album.countId })", album
             updateAlbum app, album
-
-    Bacon.fromPromise promise
 
 module.exports = indexAlbum

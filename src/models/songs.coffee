@@ -159,6 +159,9 @@ createTable = (app) ->
     table = _.extend TableName: app.config.DYNAMODB_TABLE_SONGS, songTableProperties
     app.db().createTableAsync table
 
+deleteTable = (app) ->
+    app.db().deleteTableAsync TableName: app.config.DYNAMODB_TABLE_SONGS
+
 getSongId = (serviceId, serviceSongId) ->
     encodedSericeSongId = new Buffer(serviceSongId).toString('base64')
     "#{serviceId}.#{encodedSericeSongId}"
@@ -206,6 +209,7 @@ querySongs = (app, userId, params) ->
 
 module.exports = {
     createTable
+    deleteTable
     songTableProperties
     getSongId
     putSong

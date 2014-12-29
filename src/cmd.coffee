@@ -50,4 +50,31 @@ program
         )
         Promise.all(promises)
 
+program
+    .command 'purgesongs'
+    .description 'Deletes all songs in database'
+    .action (env, options) ->
+        AWS = require 'aws-sdk'
+        { Application } = require './util/app'
+        songs = require './models/songs'
+        counts = require './models/counts'
+        models = { songs, counts }
+
+        app = new Application( program.config )
+        _.map(
+            models
+            (model, modelName) ->
+                model.deleteTable app
+                    .then(
+                        ->
+                            console.log "Successfully deleted table #{modelName}"
+                            model.createTable app
+                                .then(
+                                    -> console.log "Successfully recreated table #{modelName}"
+                                    (err) -> console.log "Error recreating table #{modelName}", err
+                                )
+                        (err) -> console.log "Error deleting table #{modelName}", err
+                    )
+        )
+
 program.parse process.argv

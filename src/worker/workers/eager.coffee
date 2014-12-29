@@ -7,7 +7,8 @@ class EagerWorker extends Worker
 
     listen: ->
         stream = @workerBus()
-            .flatMapWithConcurrencyLimit 20, (action) => @processAction(action)
+            .flatMapWithConcurrencyLimit 20, (action) =>
+                Bacon.fromPromise @processAction(action)
         stream.onValue -> #Discard result
         stream.onError (err) -> console.log "stream error"
 

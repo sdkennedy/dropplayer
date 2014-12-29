@@ -25,14 +25,14 @@ class StandaloneSQSWorker extends Worker
         console.log "Processing message #{message.MessageId}"
         @queueLength++
         action = JSON.parse(sqsMessage.Body)
-        stream = super action
-        stream.onEnd =>
-            #Now that item is successfully processed, remove it from the queue
-            console.log "Finished processing message #{message.MessageId}"
-            @queueLength--
-            @deleteMessage(message)
-            do @checkForMessages if @readyForMoreMessages()
-        return stream
+        super action
+            .tap (message) ->
+                console.log "Finished processing message #{message.MessageId}"
+                #Now that item is successfully processed, remove it from the queue
+                @deleteMessage(message)
+            .finally (message) ->
+                @queueLength--
+                do @checkForMessages if @readyForMoreMessages()
 
     readyForMoreMessages: ->
         not @retrievingMessages and @queueLength < @config.SQS_WORKER_QUEUE_SIZE

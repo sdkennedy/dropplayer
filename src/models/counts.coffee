@@ -30,6 +30,9 @@ createTable = (app) ->
     table = _.extend TableName: app.config.DYNAMODB_TABLE_COUNTS, countsTableProperties
     app.db().createTableAsync table
 
+deleteTable = (app) ->
+    app.db().deleteTableAsync TableName: app.config.DYNAMODB_TABLE_COUNTS
+
 incrCount = (app, userId, countId, data) -> 
     offsetCount app, userId, countId, data, 1
 decrCount = (app, userId, countId, data) -> 
@@ -72,4 +75,4 @@ getCount = (app, userId, countId) ->
         Key:{ userId, countId }
     ).then (data) -> data.Item
 
-module.exports = { countsTableProperties, createTable, incrCount, decrCount, offsetCount, queryCounts, getCount }
+module.exports = { countsTableProperties, createTable, deleteTable, incrCount, decrCount, offsetCount, queryCounts, getCount }
