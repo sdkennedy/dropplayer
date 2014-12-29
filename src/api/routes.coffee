@@ -19,6 +19,17 @@ module.exports = (app) ->
     express = app.express
 
     express.get(
+        "/env"
+        requireLogin
+        (req, res) ->
+            getUser app, req.user
+                .then(
+                    (user) -> res.json app.config
+                    (err) -> res.json err
+                )
+    )    
+
+    express.get(
         "/session"
         requireLogin
         (req, res) ->

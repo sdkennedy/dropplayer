@@ -323,6 +323,12 @@ createJSON = (grunt) ->
                     }
                     {
                         Namespace: "aws:elasticbeanstalk:application:environment"
+                        OptionName: "DROP_DYNAMODB_TABLE_COUNTS"
+                        Value:
+                            Ref: "CountsTable"
+                    }
+                    {
+                        Namespace: "aws:elasticbeanstalk:application:environment"
                         OptionName: "DROP_SQS_WORKER_QUEUE"
                         Value:
                             Ref: "WorkerQueue"
