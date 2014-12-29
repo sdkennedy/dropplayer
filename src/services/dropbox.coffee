@@ -2,7 +2,7 @@
 { actionKeys } = require '../indexer/constants'
 Promise = require 'bluebird'
 request = require 'request'
-_ = require 'underscore'
+_ = require 'lodash'
 { Bacon } = require 'baconjs'
 url = require 'url'
 { getServiceOrCreate, putService } = require '../models/services'

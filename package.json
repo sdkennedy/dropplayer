@@ -23,15 +23,18 @@
     "grunt-contrib-copy": "^0.7.0",
     "grunt-zip": "^0.16.2",
     "image-size": "^0.3.5",
+    "imagesize": "^1.0.0",
     "joi": "^5.0.2",
     "js-yaml": "^3.2.3",
+    "lodash": "^2.4.1",
     "mime": "^1.2.11",
+    "moment": "^2.8.4",
     "musicmetadata": "^0.6.0",
     "node-uuid": "^1.4.2",
     "passport": "^0.2.1",
     "passport-dropbox-oauth2": "^0.1.6",
     "request": "^2.49.0",
-    "underscore": "^1.7.0"
+    "request-promise": "^0.3.2"
   },
   "devDependencies": {
     "glob": "^4.3.1",

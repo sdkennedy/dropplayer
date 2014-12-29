@@ -1,6 +1,6 @@
 Joi = require 'joi'
 Promise = require 'bluebird'
-_ = require 'underscore'
+_ = require 'lodash'
 { createId, createDate } = require './util'
 { putUser } = require './users'
 errors = require '../errors'

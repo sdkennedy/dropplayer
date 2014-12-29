@@ -1,5 +1,5 @@
 Joi = require 'joi'
-_ = require 'underscore'
+_ = require 'lodash'
 { asyncValidate } = require '../util/joi'
 { createId, prefixTableName } = require './util'
 
@@ -27,7 +27,7 @@ userSchema = Joi.object().keys(
     dropbox: Joi.object()
 )
 
-getUsers = (app) ->
+scanUsers = (app) ->
     app.dbDoc().scanAsync TableName: app.config.DYNAMODB_TABLE_USERS
 
 getUser = (app, userId) ->
@@ -45,4 +45,4 @@ putUser = (app, user) ->
         Item:user
     ).then -> user
 
-module.exports = { usersTableProperties, createTable, getUsers, getUser, putUser }
+module.exports = { usersTableProperties, createTable, scanUsers, getUser, putUser }

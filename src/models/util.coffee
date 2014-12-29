@@ -1,5 +1,6 @@
 uuid = require 'node-uuid'
-_ = require 'underscore'
+_ = require 'lodash'
+{ Bacon } = require 'baconjs'
 
 createId = -> uuid.v4()
 createDate = -> (new Date()).toISOString()
@@ -22,4 +23,12 @@ createQueryParams = (tableName, hashCondition, additionalParams) ->
         KeyConditions:[ hashCondition ].concat( additionalParams.KeyConditions ? [] )
     )
 
-module.exports = { createId, createDate, nullEmptyStrings, createQueryParams }
+queryAll = (app, queryFn, params) ->
+    Bacon.fromPromise queryFn app, params
+        .flatMap (result) ->
+            streams = [ Bacon.fromArray result.Items ]
+            if result.LastEvaluatedKey?
+                streams.push queryAll(app, queryFn, { ExclusiveStartKey:result.LastEvaluatedKey })
+            Bacon.mergeAll streams
+
+module.exports = { createId, createDate, nullEmptyStrings, createQueryParams, queryAll }

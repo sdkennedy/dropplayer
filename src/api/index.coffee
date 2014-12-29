@@ -70,7 +70,7 @@ class Api extends Application
         @express.listen @config.PORT
         @eagerWorker?.listen()
 
-        console.log @express._router.stack
+        #console.log @express._router.stack
         #console.log @express._router.stack.map (route) -> [ route.name, route.regexp ]
         console.log "Listening on port #{ @config.PORT }"
 

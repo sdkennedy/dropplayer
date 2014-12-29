@@ -1,4 +1,4 @@
-_ = require 'underscore'
+_ = require 'lodash'
 Promise = require 'bluebird'
 
 countsTableProperties =
@@ -30,34 +30,31 @@ createTable = (app) ->
     table = _.extend TableName: app.config.DYNAMODB_TABLE_COUNTS, countsTableProperties
     app.db().createTableAsync table
 
-incrCount = (app, userId, countId, displayName) -> 
-    console.log "incrCount(#{userId},#{countId},#{displayName})"
-    offsetCount app, userId, countId, displayName,  "1"
-decrCount = (app, userId, countId, displayName) -> 
-    offsetCount app, userId, countId, displayName, "-1"
-offsetCount = (app, userId, countId, displayName, offset) ->
-    console.log "offsetCount(#{userId},#{countId},#{offset})"
-    app.db().updateItemAsync(
+incrCount = (app, userId, countId, data) -> 
+    offsetCount app, userId, countId, data, 1
+decrCount = (app, userId, countId, data) -> 
+    offsetCount app, userId, countId, data, -1
+
+offsetCount = (app, userId, countId, data, offset) ->
+    AttributeUpdates =
+        val:{ Action:"ADD", Value:offset }
+    for key, val of (data ? {})
+        AttributeUpdates[key] = { Action:"PUT", Value:val }
+
+    app.dbDoc().updateItemAsync(
         TableName: app.config.DYNAMODB_TABLE_COUNTS
         Key:
-            userId:{ S:userId }
-            countId:{ S:countId }
-        AttributeUpdates:
-            displayName:
-                Action:"PUT"
-                Value:{ S:displayName }
-            val:
-                Action:"ADD"
-                Value:{ N:offset }
-    ).then(
-        (res) ->
-            console.log "offsetCount(#{userId},#{countId},#{displayName},#{offset}) result", res
+            userId:userId
+            countId:countId
+        AttributeUpdates:AttributeUpdates
+    ).catch(
         (err) ->
             newErr = new Error("Could not offsetCount(#{userId},#{countId},#{offset}): #{err.message}")
-            console.log newErr.message
+            console.log newErr.message, AttributeUpdates
             Promise.reject newErr
     )
-getCounts = (app, userId, prefix, query) ->
+    
+queryCounts = (app, userId, prefix, query) ->
     doc = app.dbDoc()
     params = _.extend {}, (query ? {})
     params.TableName = app.config.DYNAMODB_TABLE_COUNTS
@@ -69,4 +66,10 @@ getCounts = (app, userId, prefix, query) ->
     console.log params
     doc.queryAsync( params )
 
-module.exports = { countsTableProperties, createTable, incrCount, decrCount, offsetCount, getCounts }
+getCount = (app, userId, countId) ->
+    app.dbDoc().getItemAsync(
+        TableName: app.config.DYNAMODB_TABLE_COUNTS
+        Key:{ userId, countId }
+    ).then (data) -> data.Item
+
+module.exports = { countsTableProperties, createTable, incrCount, decrCount, offsetCount, queryCounts, getCount }

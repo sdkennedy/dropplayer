@@ -1,6 +1,6 @@
 { actionKeys } = require './constants'
-{ Bacon } = require 'baconjs'
 { createIndex } = require '../models/services'
+
 indexService = (app, service, full=false) ->
     createIndex app, service
         .then (index) ->
@@ -40,4 +40,22 @@ removeSong = (app, userId, serviceId, serviceSongId, serviceSongHash, request) -
         "indexer.removeSong.#{userId},#{serviceId},#{serviceSongId}"
     )
 
-module.exports = { indexService, indexSong, removeSong }
+indexAlbum = (app, album) ->
+    app.workerBus().push(
+        {
+            type: actionKeys.indexAlbum
+            album
+        },
+        "indexer.indexAlbum.#{album.countId}"
+    )
+
+indexAlbums = (app, userId) ->
+    app.workerBus().push(
+        {
+            type: actionKeys.indexAlbums
+            userId
+        },
+        "indexer.indexAlbums.#{userId}"
+    )
+
+module.exports = { indexService, indexSong, removeSong, indexAlbum, indexAlbums }

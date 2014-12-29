@@ -1,7 +1,7 @@
 fs = require 'fs'
 { extname } = require 'path'
 yaml = require 'js-yaml'
-_ = require 'underscore'
+_ = require 'lodash'
 default_config = require '../config_backend'
 
 ENV_PREFIX = "DROP_"

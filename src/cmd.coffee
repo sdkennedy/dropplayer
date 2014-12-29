@@ -1,7 +1,7 @@
 #!/usr/bin/env coffee
 program = require 'commander'
 Promise = require 'bluebird'
-_ = require 'underscore'
+_ = require 'lodash'
 { loadConfig } = require './util/config'
 
 program
