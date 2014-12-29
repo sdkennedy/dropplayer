@@ -258,7 +258,7 @@ createJSON = (grunt) ->
                     {
                         Namespace: "aws:elasticbeanstalk:container:nodejs"
                         OptionName: "NodeCommand"
-                        Value: "node cmd.js api"
+                        Value: "node cmd.js worker"
                     }
                     {
                         Namespace: "aws:autoscaling:launchconfiguration"
