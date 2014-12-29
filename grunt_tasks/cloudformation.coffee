@@ -269,7 +269,7 @@ createJSON = (grunt) ->
                     {
                         Namespace: "aws:autoscaling:launchconfiguration"
                         OptionName: "EC2KeyName"
-                        Value: "drop"
+                        Value: "drop2"
                     }
                     {
                         Namespace: "aws:autoscaling:launchconfiguration"

@@ -114,7 +114,6 @@ indexSong = (app, userId, serviceId, serviceSongId, serviceSongHash, req, fileSi
         return Bacon.fromPromise getSong(app, userId, songId)
             #Only continue if song is nonexistant or hash different
             .flatMap (existingSong) ->
-                return Bacon.once()
                 needsUpdate = not existingSong? or existingSong.serviceSongHash isnt serviceSongHash
                 if needsUpdate then Bacon.once() else Bacon.never()
             # Get song metadata
