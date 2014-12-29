@@ -22,11 +22,13 @@ class HttpSQSWorker extends Worker
                 console.log "Worker request", req.body
                 stream = @processAction req.body
                     .endOnError()
-                stream.onValue -> res.status(200)
+                stream.onValue (result) ->
+                    console.log "Worker result", result
+                    res.status(200).json result
                 stream.onError (err) ->
                     console.log "Worker error", err
                     console.log("Worker error stack", err.stack) if err?.stack?
-                    res.status(500).json(err)
+                    res.status(500).json err
         )
 
     listen: ->
