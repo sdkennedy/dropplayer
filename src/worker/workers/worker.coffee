@@ -16,14 +16,9 @@ class Worker extends Application
         if handler?
             source = -> handler(action)
             # Allow stream to be retried up to 3 times
-            stream = Bacon.retry { source, retries:3, delay:->100 }
-            stream.onError (err) ->
-                console.log "Worker handler error", err
-                console.log("Worker handler error stack", err.stack) if err?.stack?
-            stream.onValue -> # Do nothing, but make sure stream starts running
-            return stream
+            return Bacon.retry { source, retries:3, delay:->100 }
         else
-            Bacon.once new Bacon.Error( new errors.NotFound("Worker handler for #{ action.type }") )
+            return Bacon.once new Bacon.Error( new errors.NotFound("Worker handler for #{ action.type }") )
 
     registerHandlers: ->
         initIndexers(@)
